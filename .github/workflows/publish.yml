@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout website source
         uses: actions/checkout@v4
+        with:
+          path: website-source
 
       - name: Resolve Sane C++ ref
         id: sane-ref
@@ -56,6 +58,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: website-source/package-lock.json
 
       - name: Restore clang-binaries cache
         uses: actions/cache/restore@v4
@@ -93,9 +96,11 @@ jobs:
             libxcursor-dev
 
       - name: Install website dependencies
+        working-directory: website-source
         run: npm ci
 
       - name: Build website with Sane C++ docs and coverage
+        working-directory: website-source
         env:
           SANE_CPP_REPO: ${{ github.workspace }}/SaneCppLibraries
           SANE_CPP_COMMIT: ${{ steps.sane-ref.outputs.ref }}
@@ -103,6 +108,7 @@ jobs:
         run: npm run build:publish
 
       - name: Update generated output repository
+        working-directory: website-source
         env:
           PUBLISH_REPO: ${{ github.workspace }}/pagghiu.github.io
         run: npm run publish:local
