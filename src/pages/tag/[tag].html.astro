@@ -36,19 +36,19 @@ const { tag, posts } = Astro.props;
   }
 
   .back-link {
-    color: #135bc7;
+    color: var(--link);
     font-weight: 750;
   }
 
   h1 {
     margin: 0.7rem 0 1.8rem;
-    color: #1d2430;
+    color: var(--text);
     font-size: clamp(2.5rem, 7vw, 4.8rem);
   }
 
   .post-list {
     display: grid;
-    border-top: 1px solid rgba(40, 54, 76, 0.12);
+    border-top: 1px solid var(--border);
   }
 
   .post-row {
@@ -56,24 +56,24 @@ const { tag, posts } = Astro.props;
     grid-template-columns: 10rem minmax(0, 1fr);
     gap: 1.4rem;
     padding: 1.3rem 0;
-    border-bottom: 1px solid rgba(40, 54, 76, 0.12);
+    border-bottom: 1px solid var(--border);
   }
 
   time {
-    color: #657184;
+    color: var(--muted);
     font-size: 0.86rem;
     font-weight: 750;
   }
 
   h2 {
     margin: 0 0 0.55rem;
-    color: #1d2430;
+    color: var(--text);
     font-size: 1.35rem;
   }
 
   p {
     margin: 0;
-    color: #657184;
+    color: var(--muted);
     line-height: 1.65;
   }
 

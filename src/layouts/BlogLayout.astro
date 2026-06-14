@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import ThemeToggle from "../components/ThemeToggle.astro";
 
 interface Props {
   title: string;
@@ -11,7 +12,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -26,6 +27,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;650;750;850&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+    <script>
+      (() => {
+        const savedTheme = localStorage.getItem("sc-theme");
+        const theme = savedTheme === "light" || savedTheme === "dark"
+          ? savedTheme
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
   </head>
   <body class="blog-body">
     <header class="blog-header">
@@ -34,11 +44,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           <strong>Sane Coding Blog</strong>
           <span>Notes on Sane C++ Libraries and practical systems work.</span>
         </a>
-        <nav aria-label="Primary">
-          <a href="/">Blog</a>
-          <a href="/SaneCppLibraries/">Sane C++ Libraries</a>
-          <a href="https://github.com/Pagghiu">GitHub</a>
-        </nav>
+        <div class="blog-actions">
+          <nav aria-label="Primary">
+            <a href="/">Blog</a>
+            <a href="/SaneCppLibraries/">Sane C++ Libraries</a>
+            <a href="https://github.com/Pagghiu">GitHub</a>
+          </nav>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
     <main>
@@ -55,8 +68,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
 <style>
   :global(.blog-body) {
-    color: #1d2430;
-    background: #f7f9fc;
+    color: var(--text);
+    background: var(--bg);
   }
 
   :global(.blog-body)::before {
@@ -64,8 +77,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   }
 
   .blog-header {
-    border-bottom: 1px solid rgba(40, 54, 76, 0.12);
-    background: rgba(255, 255, 255, 0.86);
+    border-bottom: 1px solid var(--header-border);
+    background: var(--header-bg);
     backdrop-filter: blur(18px);
     position: sticky;
     top: 0;
@@ -90,23 +103,32 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   }
 
   .blog-brand span {
-    color: #657184;
+    color: var(--muted);
     font-size: 0.9rem;
     margin-top: 0.12rem;
   }
 
+  .blog-actions,
   .blog-nav nav {
     display: flex;
+    align-items: center;
+  }
+
+  .blog-actions {
+    gap: 0.75rem;
+  }
+
+  .blog-nav nav {
     gap: 1rem;
     font-weight: 750;
-    color: #364255;
+    color: var(--muted-strong);
   }
 
   .blog-footer {
     margin-top: 4rem;
-    border-top: 1px solid rgba(40, 54, 76, 0.12);
+    border-top: 1px solid var(--border);
     padding: 2rem 0;
-    color: #657184;
+    color: var(--muted);
   }
 
   .blog-footer .shell {
@@ -117,6 +139,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
   @media (max-width: 720px) {
     .blog-nav,
+    .blog-actions,
     .blog-footer .shell {
       align-items: flex-start;
       flex-direction: column;
