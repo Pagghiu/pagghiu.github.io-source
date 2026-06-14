@@ -1,0 +1,86 @@
+---
+import BlogLayout from "../../../layouts/BlogLayout.astro";
+import { getBlogPosts } from "../../../lib/blog-data";
+
+export function getStaticPaths() {
+  return getBlogPosts().map((post) => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<BlogLayout title={post.title} description={post.summary}>
+  <article class="shell blog-post">
+    <header>
+      <a class="back-link" href="/">Blog</a>
+      <time datetime={post.date}>{post.date}</time>
+      <h1>{post.title}</h1>
+      {post.summary && <p>{post.summary}</p>}
+      {post.image && <img class="post-hero-image" src={post.image} alt="" loading="eager" />}
+    </header>
+    <div class="prose blog-prose" set:html={post.html} />
+  </article>
+</BlogLayout>
+
+<style>
+  .blog-post {
+    width: min(calc(100% - 2rem), 900px);
+    padding-top: 3rem;
+  }
+
+  .blog-post header {
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.4rem;
+    color: #135bc7;
+    font-weight: 750;
+  }
+
+  time {
+    display: block;
+    color: #657184;
+    font-size: 0.9rem;
+    font-weight: 750;
+  }
+
+  h1 {
+    margin: 0.45rem 0 0.9rem;
+    color: #1d2430;
+    font-size: clamp(2.5rem, 7vw, 4.8rem);
+    line-height: 1;
+  }
+
+  header p {
+    margin: 0;
+    max-width: 48rem;
+    color: #657184;
+    font-size: 1.14rem;
+    line-height: 1.65;
+  }
+
+  .post-hero-image {
+    width: 100%;
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    background: #e9eef6;
+  }
+
+  .blog-prose {
+    color: #2d3748;
+  }
+
+  .blog-prose :global(img) {
+    border-radius: 8px;
+    margin: 1.5rem auto;
+  }
+
+  .blog-prose :global(a) {
+    color: #135bc7;
+  }
+</style>

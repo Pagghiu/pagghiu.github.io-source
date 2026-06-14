@@ -1,0 +1,525 @@
+Title: ☔️ Sane C++ March 24
+Date: 2024-03-27
+Category: SaneCppLibraries
+Template: article_sanecpp
+Image: 2024-03-27-SaneCppLibrariesUpdate/article.png
+Slug: site/blog/2024-03-27-SaneCppLibrariesUpdate
+Summary: Welcome to the third monthly update for Sane C++ Libraries!
+
+<aside id="table-of-contents">
+<nav class="is-sticky-above-lg ">
+<details open="">
+<summary>Content</summary>
+<ul>
+<li><a class="secondary" href="#section-0">Sane C++ March 2024</a></li>
+<li><a class="secondary" href="#section-1">SC::Tools</a></li>
+<li><a class="secondary" href="#section-2">SC-build.cpp</a></li>
+<li><a class="secondary" href="#section-3">SC-package.cpp</a></li>
+<li><a class="secondary" href="#section-3-1">> Additional Reasons</a></li>
+<li><a class="secondary" href="#section-3-2">> Technical Details</a></li>
+<li><a class="secondary" href="#section-4">SC-format.cpp</a></li>
+<li><a class="secondary" href="#section-4-1">> Improvements to CI</a></li>
+<li><a class="secondary" href="#section-5">Sane C++ Improvements</a></li>
+<li><a class="secondary" href="#section-5-1">> SC::Build</a></li>
+<li><a class="secondary" href="#section-5-2">> SC::Async</a></li>
+<li><a class="secondary" href="#section-5-3">> SC::FileSystem</a></li>
+<li><a class="secondary" href="#section-5-4">> SC::Strings</a></li>
+</ul>
+</details>
+</nav>
+</aside>
+<div id="content" role="document">
+
+<section>
+<h2>SC::Tools<a href="#section-1" id="section-1" class="secondary" tabindex="-1">#</a></h2>
+<p class="chapter">written for Sane C++ Libraries, using Sane C++ Libraries</p>
+<p>
+There is no better way to improve a library than using it to create some other project or tool.
+<br>
+This is why effort has been spent using Sane C++ Libraries to build some useful tools
+needed by...Sane C++ Libraries!
+</p>
+
+<p>
+So, unsurprisingly, the big addition of the month to Sane C++ Libraries are <a
+href="https://pagghiu.github.io/SaneCppLibraries/page_tools.html" target="_blank">SC::Tools</a>!
+</p>
+<p>
+
+Something similar to <a href="https://pagghiu.github.io/SaneCppLibraries/page_tools.html"
+target="_blank">SC::Tools</a> already used to exist in some form:
+<code>SCBuild.cpp</code>, the bootstrap from source C++ file using
+<a href="https://pagghiu.github.io/SaneCppLibraries/library_build.html" target="_blank">SC::Build</a>
+build system (generator).<br>
+It used to work thanks to a bootstrap bash / batch file that compiles <code>SC-Build.cpp</code> and
+the unity build file <code>SC.cpp</code> to produce the <code>SCBuild[.exe]</code> self-contained
+(statically linked) executable.<br>
+This was nice but it had a few issues, for example it was not able to detect
+changes in any of the source files and rebuild the executable accordingly.
+</p>
+
+<p>
+<a href="https://pagghiu.github.io/SaneCppLibraries/page_tools.html" target="_blank">SC::Tools</a>
+is a generalization of the
+<code>SCBuild.{sh | bat} </code> mechanism into a more flexible
+<code>SC.sh $TOOL [$ACTION]</code>.
+
+This allows also running custom tools, leveraging Sane C++ Libraries, by just launching
+<code>SC.sh myDirectory/myScript.cpp [$ACTION]</code>!
+</p>
+<p>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/tool.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/tool.png">
+</a>
+</p>
+
+<p>
+The source code dependency tracking is taken care of by a couple of parametric makefiles.<br>
+
+The intermediate files directory is shared by all tools, and the unity build file
+<code>SC.cpp</code> (#include-d by <code>Tools.cpp</code> ) makes the entire set of Sane C++
+Libraries available to every tool.<br>
+It's compiled just once (in a couple of seconds), making any successive compile / linking of
+the tools extremely fast (less than 1 sec on a recent laptop).
+</p>
+<p>
+Tools in the<code>Tools</code> subdirectory are special, as they can be invoked by just using
+their name (without the <code>SC-</code> prefix).<br>
+<code>./SC.sh Tools/SC-build.cpp</code> can be invoked as just <code>./SC.sh build</code>.
+</p>
+</section>
+
+
+
+<section>
+<h2>SC-build.cpp<a href="#section-2" id="section-2" class="secondary" tabindex="-1">#</a></h2>
+<p class="chapter">building C++ programs in C++, why not?</p>
+The first tool is just called
+<a href="https://github.com/Pagghiu/SaneCppLibraries/blob/main/Tools/SC-build.cpp" target="_blank">
+SC-build.cpp</a>.<br> It comes with a companion
+<a href="https://github.com/Pagghiu/SaneCppLibraries/blob/main/Tools/SC-build.h" target="_blank">
+SC-build.h</a> file holding code shared between multiple projects.<br>
+Its default action (<code>configure</code>) is equivalent to
+the (now old) <code>SCBuild.sh</code>, that generates build/project files.
+<p>
+The new action called <code>compile</code> (guess what?) compiles the
+generated projects 🤯!
+</p>
+<p>
+<code>./SC.sh Tools/SC-build.cpp configure</code><br>
+or<br>
+<code>./SC.sh build configure</code>
+</p>
+<p>
+and on windows:
+</p>
+
+<p>
+<code>SC.bat Tools\SC-build.cpp compile</code><br>
+or<br>
+<code>SC.bat build compile</code>
+</p>
+
+<p>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/build.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/build.png">
+</a>
+</p>
+</section>
+
+
+
+<section>
+<h2>SC-package.cpp<a href="#section-3" id="section-3" class="secondary" tabindex="-1">#</a></h2>
+<p class="chapter">wheel reinvention, reinvented</p>
+The second tool is
+<a href="https://github.com/Pagghiu/SaneCppLibraries/blob/main/Tools/SC-package.cpp" target="_blank">
+SC-package.cpp</a>, once again a manifestation of the wheel
+reinvention attitude already pervading the entire project 😊.
+<p>
+This poor-man's imperative package manager downloads binary files taking care of checking
+MD5, extracting and testing what's contained.<br>
+The guiding reason for this tool to exist was to automatically be able downloading and
+extracting the official<code>clang</code> distribution (at a specific version, matching the
+Gitlab CI) in order to use <code>clang-format</code> on the entire repo.<br>
+This is needed for a potential contributor to properly format files before sending a Pull
+Request, keeping the CI format validation jobs happy.
+</p>
+
+<p>
+The end result is a folder with <i>_PackagesCache</i> and <i>_Packages</i> under <i>_Build</i>.
+</p>
+
+<p>
+This is still very primitive for now, but who knows, maybe in the future it could be evolved
+into something more advanced.
+</p>
+
+<p>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/packages-results.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/packages-results.png" width="75%">
+</a>
+</p>
+<h3>Additional reasons to exist<a href="#section-3-1" id="section-3-1" class="secondary" tabindex="-1">#</a>
+</h3>
+<p class="chapter">other than wheel re-invention</p>
+<p>
+Too often <i>repository automation</i> tools are written in<code>bash</code> or
+<code>batch</code> where best thing you can do is putting print (echo) statements to debug
+them.<br>
+Slightly better are the cases when an actual programming language like <code>python</code>
+or <code>javascript</code> is used, but sometimes this comes with an entire set of problems
+regarding their requirements and in general the fact that such tools expect to be installed
+globally on developer's system, with probability of incurring into a <i>it works on my machine</i>
+situation.<br> Things like Python <i>.venv</i> can sometimes help but not always. <br>
+In some cases such scripts do not even exist, but you're getting a bunch of <i>install this</i>
+or <i>install that</i> <code>Readmes</code> always missing some step and where you end up
+wasting a lot of time.<br>
+And let's not discuss docker about please, I am trying to stay nice 😄.
+</p>
+
+<p>
+So my obvious solution has been to write such a tool in C++ using Sane C++ Libraries of
+course, so that I can debug it properly just like any other program.<br>
+I am really happy the result, the small program is easy to follow and does its job.<br>
+For now all data is local to the repository <i>_Build</i> directory but it would be easy
+sharing the <i>_PackagesCache</i> into some custom user directory to save some space on
+multiple checked-out copies of the repository. <br>
+For any issue, I can just debug this C++ <i>shell script</i>, that is just a regular
+<i>program</i>, like all other programs that a C++ programmer debugs <i>every day</i>.
+</p>
+
+<h3>Technical Details<a href="#section-3-2" id="section-3-2" class="secondary" tabindex="-1">#</a></h3>
+<p class="chapter">if you really want to know...</p>
+<p>
+On Posix to get<code>clang+llvm-x.y.z-$ARCH-$PLATFORM</code> you just download a file from
+github, check it MD5, and extract the <code>.tar.gz</code> file.<br>
+</p>
+<p>
+
+On Windows this is even more difficult because the official LLVM binary distribution is some
+sort of self-extracting setup (requiring admin privileges too!) and to extract it you need a
+tool like <code>7zip</code>.
+<code>7zip</code> is as well a self extracting installer and requires another tool (called
+<code>7zr.exe</code>) in order to be extracted!.
+So on Windows <code>SC-package</code> downloads <code>7zr.exe</code> -> extracts the
+<code>7zip</code> installer -> uses the extracted <code>7z.exe</code> to extract the
+<code>LLVM-X.Y.Z-$ARCH</code> into some directory.
+If someone knows an easier way of doing this (without installing other tools or requiring a
+package manger) please let me know.
+</p>
+
+<p>
+On all platforms / architectures (macOS/Windows/Linux and ARM64/Intel64) MD5 of the
+downloaded files it's being checked to make sure they're all legit.
+This also helps creating a <i>_PackagesCache</i> to hold these setup files and avoid
+re-downloading them every time.
+</p>
+
+<p>
+Also a small <code>clang-format</code> test is run to make sure it's properly installed and
+available.
+The extracted directory is symlinked into a <i>_Packages</i> sub-folder containing package name
+/ platform.
+</p>
+
+
+<p>
+Sane C++ Libraries doesn't have (yet) a properly working HTTPS client, so an alternative
+solution was necessary.
+It looks like nowadays<code>curl</code> is pre-installed on any
+recent <code>macOS</code>,<code>linux</code> and<code>windows</code>
+install and so <code>SC-package</code> uses it.
+</p>
+
+
+<a href="https://pagghiu.github.io/SaneCppLibraries/library_hashing.html" target="_blank">SC::Hashing</a>
+library has been used to compute all MD5 easily getting the job done.
+<br>
+File operations and cross-platform path handling have been implemented using the
+<a href="https://pagghiu.github.io/SaneCppLibraries/library_file_system.html" target="_blank">SC::FileSystem</a>
+library.
+
+</section>
+
+
+
+<section>
+<h2>SC-format.cpp<a href="#section-4" id="section-4" class="secondary" tabindex="-1">#</a></h2>
+<p class="chapter">code is poetry, prove me wrong</p>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/blob/main/Tools/SC-format.cpp" target="_blank">
+SC-format.cpp
+</a>
+runs <code>clang-format</code> on all files of the repository, with some exclusions, to beautify source code.
+<p>
+It launches many parallel processes but always <i>dynamically limiting</i> them to the number
+of available processors using <a href="https://pagghiu.github.io/SaneCppLibraries/library_process.html"
+target="_blank">SC::Process</a>.
+Processes are monitored using the
+<a href="https://pagghiu.github.io/SaneCppLibraries/library_async.html" target="_blank">SC::Async</a>
+Library, and as soon as one "slot" is made available, it's being filled with a new <code>clang-format</code>
+process.
+</p>
+<p>
+Most code has upper bounds and fixed buffers.<br>
+Even if it's totally unnecessary for such a small script, it's cool to see how the libraries work
+together to allow minimal (or no) heap allocation!<br>
+In this example the number of maximum processes is fixed and the recursive file system iteration
+happens with a lambda, avoiding storing a vector of all file paths found in the target directory.
+</p>
+<p>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/format-script.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/format-script.png">
+</a>
+</p>
+
+<p>
+
+The tool looks for <code>clang-format</code> in known places, depending on platform, and if a
+working <code>clang-format</code> at the correct version is found, it will be used.
+This is for example what happens on CI as <code>clang-format</code> is pre-installed on Github
+CI OS
+Images.
+If the no suitable <code>clang-format</code> has been found, then
+<a href="https://github.com/Pagghiu/SaneCppLibraries/blob/main/Tools/SC-format.cpp" target="_blank">
+SC-format.cpp
+</a>
+relies on
+<a href="https://github.com/Pagghiu/SaneCppLibraries/blob/main/Tools/SC-package.cpp" target="_blank">
+SC-package.cpp
+</a>
+
+to
+download a brand new set of LLVM binaries from github, extracting and symlinking them.
+
+</p>
+<h3>Improvements to the CI and .vscode files<a href="#section-4-1" id="section-4-1" class="secondary"
+tabindex="-1">#</a></h3>
+
+All these tools are now making the CI scripts and the .VSCode files a lot nicer.
+<p>
+These are the new simplified CI and VSCode build scripts:
+</p>
+
+<p>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/ci-linux.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/ci-linux.png" width="48%"></a>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/ci-windows.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/ci-windows.png" width="48%"></a>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/ci-macos.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/ci-macos.png" width="48%"></a>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/vscode-build.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/vscode-build.png" width="48%"></a>
+</p>
+
+</section>
+
+
+<section>
+<h2>Improvements to the Library<a href="#section-5" id="section-5" class="secondary" tabindex="-1">#</a></h2>
+
+As expected, the act of building this simple set of tools, has uncovered issues, bugs and
+limitations in Sane C++ Libraries.<br>
+Of course they've been promptly fixed, but this shows, once again, that developing libraries
+in a vacuum doesn't generate strong enough code 🙂.<br>
+Hopefully more developers will start using the libraries, reporting issues or providing bug-reports
+and maybe even Pull Requests!
+
+<h3>SC::Process</h3>
+The <a href="https://pagghiu.github.io/SaneCppLibraries/library_process.html" target="_blank">SC::Process</a>
+class has been pretty crucial in implementing the tools.
+<p>
+The original interface was not so easy to use so it got a nice facelift:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/f038a44e67e9c72b88182c20cc923698512342b2"
+target="_blank">
+Process: Improve the API to be more pleasant to use</a>
+</li>
+</ul>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/new-process-api.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/new-process-api.png">
+</a>
+
+</p>
+<p>
+It also got some more features:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/bed597734acf9673427d3d61722854e2743c8b3b"
+target="_blank">
+Process: Allow ignoring child process standard output / error</a>
+</li>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/32e5fb47ca022078a7a02cf131057342d2df5cfd"
+target="_blank">
+Process: Add Process::getNumberOfProcessors
+</a>
+</li>
+</ul>
+</p>
+
+<p>
+Improved Tests and Documentation:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/771300ef584c2e26b7ef9992fbececdd66f1362e"
+target="_blank"> Process: Cleanup tests and improve documentation
+</a>
+</li>
+</ul>
+</p>
+
+<p>
+and bugfixes for very tricky OS-specific issues!
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/1145a382cd4cf37a59425478f9c62c23651696cf"
+target="_blank"> Process: Fix Posix waitForExitSync failing on non zero exit status</a>
+</li>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/eebe13a808fa457fe0a2df4da0b1905f60451993"
+target="_blank"> Process: Handle kevent ESRCH errors caused by processes exiting too
+fast</a>
+</li>
+</ul>
+</p>
+
+<h3>SC::Build<a href="#section-5-1" id="section-5-1" class="secondary" tabindex="-1">#</a></h3>
+<p>
+
+As already said the <a href="https://pagghiu.github.io/SaneCppLibraries/library_build.html"
+target="_blank">SC::Build</a> library got the capability of compiling specific configuration
+/ architecture combos.
+</p>
+<p>
+This has been also the occasion to cleanup the intermediates / output folder naming, so that
+all folders can coexist in the same working directory.
+This is useful to map that very same working directory on all Operating Systems (with a couple
+of Virtual Machines), so that code can be quickly tested on all platforms while it's being
+developed, before even hitting the CI.
+</p>
+
+<p>
+Features:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/1f2a8aab363b884bb02432470567d8d7d3fb83bf"
+target="_blank"> Build: Support compiling specific configuration / architecture </a>
+
+</li>
+</ul>
+</p>
+
+<p>
+<a href="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/build-directories.png" target="_blank">
+<img src="{attach}/images/2024-03-27-SaneCppLibrariesUpdate/build-directories.png" width="50%">
+</a>
+</p>
+
+<h3>SC::Async<a href="#section-5-2" id="section-5-2" class="secondary" tabindex="-1">#</a></h3>
+
+<p>
+The <a href="https://pagghiu.github.io/SaneCppLibraries/library_async.html" target="_blank">SC::Async</a>
+library got some fixes in the child process exit handling,
+that
+was randomly failing on the<code>SC-format</code> command!
+</p>
+<p>
+Features:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/996374f9f37542631f3b579e2c34e9327c603df6"
+target="_blank">Async: Remove the handle from active list before calling complete
+callback</a>
+<br>
+This allows reusing "completed" AsyncRequests in the callback for a new operation!)
+</li>
+</ul>
+</p>
+<p>
+Bugfixes:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/9d94bb85354d45fc0358230d4d7c231107cbf87e"
+target="_blank">Async: Handle merged <code>SIGCHLD</code> by signalfd on epoll
+backend</a>
+<br>
+This was causing spuriously missing child process exit notifications, and it was only
+visible on Linux (Intel) with a "high enough" number of concurrent process finishing
+"simultaneously".
+</li>
+</ul>
+</p>
+
+<h3>SC::FileSystem<a href="#section-5-3" id="section-5-3" class="secondary" tabindex="-1">#</a></h3>
+
+<p>
+<a href="https://pagghiu.github.io/SaneCppLibraries/library_fileSystem.html"
+target="_blank">SC::FileSystem</a> got some additions needed mainly by
+<code>SC-package</code>
+and a bugfix found when developing the tool.
+</p>
+
+<p>
+Features:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/1a5955962f718e8096bdfefb9cc238a32c53b76a"
+target="_blank">FileSystem: Add existsAndIsLink, removeLinkIfExists and moveDirectory</a>
+</li>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/f1c770a035d2038eeaaf42bcc12e85a9d70dacab"
+target="_blank">FileSystem: Add createSymbolicLink</a>
+</li>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/0e8137c2afdb2033c6a3c6fd901bf9f6042f2508"
+target="_blank">File: Add read / write uint8_t overloads and make readAppend private</a>
+</li>
+</ul>
+</p>
+<p>
+Bugfixes:
+<ul>
+<li>
+<a href="https://github.com/Pagghiu/SaneCppLibraries/commit/f444e3619f691a23b81e30df9f8c2d5dd8a0080d"
+target="_blank">File: Pop null terminator before appending to String with
+readUntilEOF</a>
+</li>
+</ul>
+</p>
+
+<h3>SC::Strings<a href="#section-5-4" id="section-5-4" class="secondary" tabindex="-1">#</a></h3>
+
+<a href="https://pagghiu.github.io/SaneCppLibraries/library_strings.html" target="_blank">SC::Strings</a> got
+a series of improvements identified when implementing all
+the tools.
+<p>
+Features:
+<ul>
+<li><a href="https://github.com/Pagghiu/SaneCppLibraries/commit/f1bec9d5713bf3fc8dff32f6d5e875b025161db9"
+target="_blank">Strings: Add StringView {starts | ends}WithAnyOf and trim{ start | end
+}AnyOf</a></li>
+<li><a href="https://github.com/Pagghiu/SaneCppLibraries/commit/4efa35baecfc6fdabf9eb06a01e2dff443314455"
+target="_blank">Strings: Allow using<code>SmallString<N></code> as argument to
+format</a></li>
+<li><a href="https://github.com/Pagghiu/SaneCppLibraries/commit/d563cf064d890447a567dd039791c3e6fe931415"
+target="_blank">Strings: Add casing parameter to StringBuilder::appendHex</a></li>
+<li><a href="https://github.com/Pagghiu/SaneCppLibraries/commit/2098dd80d5fd12f37cdff31cd337bb90ec97c309"
+target="_blank">Strings: Add Windows only UTF16 StringView::fromNullTerminated</a></li>
+<li><a href="https://github.com/Pagghiu/SaneCppLibraries/commit/36db6b61f9db1bcf897a279c4a277c279592855c"
+target="_blank">Strings: Add StringFormatterFor void* pointers</a></li>
+</ul>
+</p>
+
+<p>
+
+Bugfixes:
+<ul>
+<li><a href="https://github.com/Pagghiu/SaneCppLibraries/commit/3eef35691023382437f002aeb94c88f4df0d64ef"
+target="_blank">Strings: Fix an UB when copying StringView containing null</a></li>
+</ul>
+</p>
+
+</section>
+</div>

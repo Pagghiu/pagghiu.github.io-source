@@ -1,0 +1,65 @@
+---
+interface Props {
+  label: string;
+  tone: "draft" | "mvp" | "usable" | "complete" | "unknown";
+  variant?: "default" | "strong";
+}
+
+const { label, tone, variant = "default" } = Astro.props;
+---
+
+<span class={`maturity-badge ${tone} ${variant}`}>
+  <span class="dot"></span>
+  <span>{label}</span>
+</span>
+
+<style>
+  .maturity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.42rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--muted-strong);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .maturity-badge.strong {
+    padding: 0.52rem 0.9rem;
+    border-color: color-mix(in srgb, var(--badge-color) 35%, var(--border));
+    background: color-mix(in srgb, var(--badge-color) 18%, transparent);
+    color: color-mix(in srgb, var(--badge-color) 28%, var(--text));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .dot {
+    width: 0.58rem;
+    height: 0.58rem;
+    border-radius: 50%;
+    background: var(--badge-color);
+    box-shadow: 0 0 0.7rem color-mix(in srgb, var(--badge-color) 60%, transparent);
+  }
+
+  .draft {
+    --badge-color: #ff6a7b;
+  }
+
+  .mvp {
+    --badge-color: #ffd166;
+  }
+
+  .usable {
+    --badge-color: #8deab0;
+  }
+
+  .complete {
+    --badge-color: #78daff;
+  }
+
+  .unknown {
+    --badge-color: #b5bfd3;
+  }
+</style>

@@ -1,0 +1,102 @@
+---
+const tabs = [
+  {
+    id: "single-file",
+    label: "Single file",
+    copy: "Vendor one library with the release header or generate a fresh standalone amalgamation.",
+    code: `#include "SaneCppFoundation.h"
+#define SANE_CPP_IMPLEMENTATION
+#include "SaneCppFoundation.h"`
+  },
+  {
+    id: "repo-checkout",
+    label: "Repo checkout",
+    copy: "Vendor the repository, add SC.cpp to your build, and keep the same library boundaries an agent will see in the repo.",
+    code: `git clone https://github.com/Pagghiu/SaneCppLibraries.git
+# add SC.cpp to your build
+# include Libraries/Foundation/*.h`
+  },
+  {
+    id: "build-integration",
+    label: "Build integration",
+    copy: "Use SC::Build when you want examples, tests, native builds, cross targets, or package-managed toolchains.",
+    code: `./SC.sh build configure
+./SC.sh build compile SCTest
+./SC.sh build run SCExample`
+  }
+];
+---
+
+<div class="install-tabs" role="tablist" aria-label="Adoption modes">
+  {tabs.map((tab, index) => (
+    <button
+      class={`install-tab ${index === 0 ? "active" : ""}`}
+      type="button"
+      role="tab"
+      aria-selected={index === 0 ? "true" : "false"}
+      data-install-tab={tab.id}
+    >
+      {tab.label}
+    </button>
+  ))}
+</div>
+
+<div class="install-panels">
+  {tabs.map((tab, index) => (
+    <section class={`install-panel ${index === 0 ? "active" : ""}`} data-install-panel={tab.id}>
+      <p class="copy-muted">{tab.copy}</p>
+      <pre><code>{tab.code}</code></pre>
+    </section>
+  ))}
+</div>
+
+<script is:inline>
+  const tabs = Array.from(document.querySelectorAll("[data-install-tab]"));
+  const panels = Array.from(document.querySelectorAll("[data-install-panel]"));
+
+  function activateInstallTab(id) {
+    tabs.forEach((tab) => {
+      const isActive = tab.dataset.installTab === id;
+      tab.classList.toggle("active", isActive);
+      tab.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+    panels.forEach((panel) => {
+      panel.classList.toggle("active", panel.dataset.installPanel === id);
+    });
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => activateInstallTab(tab.dataset.installTab));
+  });
+</script>
+
+<style>
+  .install-tabs {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin: 1rem 0 0.6rem;
+  }
+
+  .install-tab {
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .install-tab.active {
+    color: var(--text);
+    background: rgba(120, 218, 255, 0.12);
+    border-color: rgba(120, 218, 255, 0.3);
+  }
+
+  .install-panel {
+    display: none;
+  }
+
+  .install-panel.active {
+    display: block;
+  }
+</style>

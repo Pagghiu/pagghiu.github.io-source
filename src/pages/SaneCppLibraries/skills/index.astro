@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getSkills } from "../../../lib/site-data";
+
+const [skill] = getSkills();
+---
+
+<BaseLayout title="Skill | Sane C++ Libraries" description="The repo skill that helps agents discover the right Sane C++ topic before editing code.">
+  <section class="shell page-hero">
+    <div class="section-heading">
+      <div class="eyebrow">Skill</div>
+      <h1>The repository skill</h1>
+      <p>
+        The skill is the short path into the repository: use it to find the right library, guide, build command, or
+        generated reference before changing code.
+      </p>
+    </div>
+  </section>
+
+  {skill && (
+    <section class="shell">
+      <section class="panel category-panel">
+        <div class="section-heading compact">
+          <div class="eyebrow">Repository</div>
+          <h2>{skill.title}</h2>
+        </div>
+        <a class="card skill-card" href={skill.sourceUrl} target="_blank" rel="noreferrer">
+          <strong>{skill.title}</strong>
+          <p>{skill.description}</p>
+          <small>{skill.slug}</small>
+        </a>
+      </section>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .category-panel {
+    padding: 1.2rem;
+  }
+
+  .compact {
+    margin-bottom: 1rem;
+  }
+
+  .compact h2 {
+    font-size: clamp(1.4rem, 2vw, 2rem);
+  }
+
+  .skill-card {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .skill-card small {
+    color: var(--muted);
+  }
+</style>

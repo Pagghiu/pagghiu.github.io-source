@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { withBase } from "../../../lib/base";
+---
+
+<BaseLayout title="Community | Sane C++ Libraries" description="Contributing, code style, community channels, and repo coordination for Sane C++ Libraries.">
+  <section class="shell page-hero">
+    <div class="section-heading">
+      <div class="eyebrow">Community</div>
+      <h1>Contributing and community</h1>
+      <p>Use the guides for onboarding, then drop into the reference and source tree when you need exact detail.</p>
+    </div>
+    <div class="card-grid grid">
+      <a class="card" href={withBase("/guides/building-contributor/")}>
+        <strong>Contributor build guide</strong>
+        <p>Generate projects, run tests, and build examples across supported platforms.</p>
+      </a>
+      <a class="card" href={withBase("/guides/coding-style/")}>
+        <strong>Coding style</strong>
+        <p>Readability, correctness, warnings-as-errors, and the project’s preferred C++ subset.</p>
+      </a>
+      <a class="card" href="https://discord.gg/tyBfFp33Z6">
+        <strong>Discord</strong>
+        <p>Join the broader Sane Coding community and talk through project direction.</p>
+      </a>
+      <a class="card" href="https://github.com/Pagghiu/SaneCppLibraries/discussions">
+        <strong>GitHub Discussions</strong>
+        <p>Open-ended conversations, proposals, and public collaboration.</p>
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

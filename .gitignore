@@ -1,0 +1,6 @@
+.DS_Store
+.astro
+.pagefind
+dist
+node_modules
+npm-debug.log*

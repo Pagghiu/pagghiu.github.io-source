@@ -1,0 +1,26 @@
+---
+import { withBase } from "../lib/base";
+
+interface Props {
+  size?: number;
+}
+
+const { size = 44 } = Astro.props;
+---
+
+<img
+  class="logo-mark"
+  src={withBase("/brand/sc-logo.svg")}
+  alt="Sane C++ Libraries logo"
+  width={size}
+  height={size}
+  loading="eager"
+/>
+
+<style>
+  .logo-mark {
+    flex: 0 0 auto;
+    filter: drop-shadow(0 10px 22px rgba(0, 8, 255, 0.26));
+  }
+</style>
+

@@ -1,0 +1,75 @@
+---
+interface Props {
+  slug: string;
+  size?: "sm" | "md";
+}
+
+const { slug, size = "md" } = Astro.props;
+
+const iconMap: Record<string, string> = {
+  async: "schedule",
+  "async-streams": "waves",
+  containers: "inventory_2",
+  "containers-reflection": "dataset",
+  file: "description",
+  "file-system": "folder_open",
+  "file-system-iterator": "rule_folder",
+  "file-system-watcher": "visibility",
+  foundation: "foundation",
+  hashing: "tag",
+  http: "language",
+  "http-client": "cloud_download",
+  memory: "memory",
+  plugin: "extension",
+  process: "hub",
+  reflection: "psychology",
+  "serialization-binary": "deployed_code",
+  "serialization-text": "article",
+  "serial-port": "settings_input_hdmi",
+  socket: "cable",
+  strings: "text_fields",
+  testing: "science",
+  threading: "account_tree",
+  time: "timer"
+};
+
+const icon = iconMap[slug] ?? "component_exchange";
+---
+
+<span class={`library-icon ${size}`} aria-hidden="true">
+  <span class="material-symbols-outlined">{icon}</span>
+</span>
+
+<style>
+  .library-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--accent-cool) 16%, var(--border));
+    background: color-mix(in srgb, var(--accent-strong) 10%, transparent);
+    color: var(--link-hover);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+  }
+
+  .library-icon.sm {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 8px;
+  }
+
+  .library-icon.md {
+    width: 2.7rem;
+    height: 2.7rem;
+  }
+
+  .library-icon .material-symbols-outlined {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .library-icon.sm .material-symbols-outlined {
+    font-size: 1rem;
+  }
+</style>

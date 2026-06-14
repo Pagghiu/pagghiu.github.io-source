@@ -1,0 +1,129 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Sane Coding Blog" } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical.toString()} />
+    <link rel="canonical" href={canonical.toString()} />
+    <link rel="alternate" type="application/atom+xml" title="Sane Coding Blog" href="/feeds/all.atom.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;650;750;850&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body class="blog-body">
+    <header class="blog-header">
+      <div class="shell blog-nav">
+        <a class="blog-brand" href="/">
+          <strong>Sane Coding Blog</strong>
+          <span>Notes on Sane C++ Libraries and practical systems work.</span>
+        </a>
+        <nav aria-label="Primary">
+          <a href="/">Blog</a>
+          <a href="/SaneCppLibraries/">Sane C++ Libraries</a>
+          <a href="https://github.com/Pagghiu">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="blog-footer">
+      <div class="shell">
+        <span>© Stefano Cristiano</span>
+        <a href="/feeds/all.atom.xml">Atom feed</a>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  :global(.blog-body) {
+    color: #1d2430;
+    background: #f7f9fc;
+  }
+
+  :global(.blog-body)::before {
+    display: none;
+  }
+
+  .blog-header {
+    border-bottom: 1px solid rgba(40, 54, 76, 0.12);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(18px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .blog-nav {
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.4rem;
+  }
+
+  .blog-brand strong,
+  .blog-brand span {
+    display: block;
+  }
+
+  .blog-brand strong {
+    font-size: 1.05rem;
+  }
+
+  .blog-brand span {
+    color: #657184;
+    font-size: 0.9rem;
+    margin-top: 0.12rem;
+  }
+
+  .blog-nav nav {
+    display: flex;
+    gap: 1rem;
+    font-weight: 750;
+    color: #364255;
+  }
+
+  .blog-footer {
+    margin-top: 4rem;
+    border-top: 1px solid rgba(40, 54, 76, 0.12);
+    padding: 2rem 0;
+    color: #657184;
+  }
+
+  .blog-footer .shell {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  @media (max-width: 720px) {
+    .blog-nav,
+    .blog-footer .shell {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .blog-nav nav {
+      flex-wrap: wrap;
+    }
+  }
+</style>

@@ -1,0 +1,148 @@
+---
+import BlogLayout from "../layouts/BlogLayout.astro";
+import { getBlogPosts } from "../lib/blog-data";
+
+const posts = getBlogPosts();
+const featured = posts[0];
+---
+
+<BlogLayout title="Sane Coding Blog" description="Sane Coding Blog by Stefano Cristiano">
+  <section class="shell blog-hero">
+    <div>
+      <h1>Sane Coding Blog</h1>
+      <p>
+        Release notes, design notes, and practical updates around Sane C++ Libraries.
+      </p>
+    </div>
+    <a class="button primary" href="/SaneCppLibraries/">Open Sane C++ Libraries</a>
+  </section>
+
+  {featured && (
+    <section class="shell featured-post">
+      <a class="featured-card" href={`/site/blog/${featured.slug}.html`}>
+        {featured.image && <img src={featured.image} alt="" loading="eager" />}
+        <div>
+          <time datetime={featured.date}>{featured.date}</time>
+          <h2>{featured.title}</h2>
+          <p>{featured.summary}</p>
+        </div>
+      </a>
+    </section>
+  )}
+
+  <section class="shell post-list" aria-label="Blog posts">
+    {posts.map((post) => (
+      <article class="post-row">
+        <time datetime={post.date}>{post.date}</time>
+        <div>
+          <h2><a href={`/site/blog/${post.slug}.html`}>{post.title}</a></h2>
+          <p>{post.summary}</p>
+        </div>
+      </article>
+    ))}
+  </section>
+</BlogLayout>
+
+<style>
+  .blog-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 2rem;
+    padding: 4rem 0 2rem;
+  }
+
+  .blog-hero h1 {
+    margin: 0 0 0.8rem;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 0.96;
+  }
+
+  .blog-hero p {
+    margin: 0;
+    max-width: 42rem;
+    color: #657184;
+    font-size: 1.16rem;
+    line-height: 1.65;
+  }
+
+  .featured-post {
+    margin-top: 1rem;
+  }
+
+  .featured-card {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 1.4rem;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid rgba(40, 54, 76, 0.12);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 20px 55px rgba(37, 52, 76, 0.08);
+  }
+
+  .featured-card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #e9eef6;
+  }
+
+  time {
+    color: #657184;
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  .featured-card h2,
+  .post-row h2 {
+    margin: 0.35rem 0 0.55rem;
+    color: #1d2430;
+  }
+
+  .featured-card h2 {
+    font-size: clamp(1.8rem, 3.3vw, 3rem);
+    line-height: 1.05;
+  }
+
+  .featured-card p,
+  .post-row p {
+    margin: 0;
+    color: #657184;
+    line-height: 1.65;
+  }
+
+  .post-list {
+    display: grid;
+    margin-top: 2.5rem;
+    border-top: 1px solid rgba(40, 54, 76, 0.12);
+  }
+
+  .post-row {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 1.4rem;
+    padding: 1.3rem 0;
+    border-bottom: 1px solid rgba(40, 54, 76, 0.12);
+  }
+
+  .post-row h2 {
+    font-size: 1.35rem;
+  }
+
+  @media (max-width: 780px) {
+    .blog-hero,
+    .featured-card,
+    .post-row {
+      grid-template-columns: 1fr;
+    }
+
+    .blog-hero {
+      align-items: start;
+      flex-direction: column;
+      padding-top: 2.5rem;
+    }
+  }
+</style>

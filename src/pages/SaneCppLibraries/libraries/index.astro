@@ -1,0 +1,273 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import LibraryIcon from "../../../components/LibraryIcon.astro";
+import MaturityBadge from "../../../components/MaturityBadge.astro";
+import { getLibraries } from "../../../lib/site-data";
+import { withBase } from "../../../lib/base";
+
+const libraries = getLibraries();
+
+const groups = [
+  {
+    title: "Core constraints",
+    summary: "Types, memory, containers, strings, time, hashing, and tests.",
+    slugs: ["foundation", "memory", "containers", "strings", "time", "hashing", "testing"]
+  },
+  {
+    title: "Runtime and I/O",
+    summary: "Files, sockets, processes, async, streams, and platform notifications.",
+    slugs: [
+      "async",
+      "async-streams",
+      "await",
+      "file",
+      "file-system",
+      "file-system-iterator",
+      "file-system-watcher",
+      "socket",
+      "process",
+      "serial-port",
+      "threading"
+    ]
+  },
+  {
+    title: "Data and protocols",
+    summary: "Reflection, serialization, HTTP, plugins, and integration points for real examples.",
+    slugs: [
+      "reflection",
+      "containers-reflection",
+      "serialization-text",
+      "serialization-binary",
+      "http",
+      "http-client",
+      "plugin"
+    ]
+  }
+];
+
+const groupedSlugs = new Set(groups.flatMap((group) => group.slugs));
+const groupedLibraries = groups.map((group) => ({
+  ...group,
+  libraries: group.slugs
+    .map((slug) => libraries.find((library) => library.slug === slug))
+    .filter((library): library is (typeof libraries)[number] => Boolean(library))
+}));
+const remainingLibraries = libraries.filter((library) => !groupedSlugs.has(library.slug));
+---
+
+<BaseLayout title="Libraries | Sane C++ Libraries" description="Current Sane C++ library map with maturity, dependencies, downloads, and generated reference links.">
+  <section class="shell page-hero library-landing">
+    <div class="library-hero-copy">
+      <h1>Libraries currently in the tree</h1>
+      <p>
+        Pick the boundary first, then check maturity, dependencies, constraints, and validation paths before asking an
+        agent to investigate or edit code.
+      </p>
+    </div>
+    <div class="catalog-summary panel">
+      <strong>{libraries.length}</strong>
+      <span>libraries</span>
+      <small>Each tile links to the library page and generated reference.</small>
+    </div>
+  </section>
+
+  <section class="shell library-groups">
+    {groupedLibraries.map((group) => (
+      <section class="library-group panel">
+        <div class="group-heading">
+          <div>
+            <div class="eyebrow">{group.title}</div>
+            <h2>{group.summary}</h2>
+          </div>
+          <span>{group.libraries.length} libraries</span>
+        </div>
+        <div class="library-matrix">
+          {group.libraries.map((library) => (
+            <a class="library-cell" href={withBase(`/libraries/${library.slug}/`)}>
+              <LibraryIcon slug={library.slug} size="sm" />
+              <div>
+                <strong>{library.title}</strong>
+                <p>{library.summary}</p>
+                <small>{library.dependencies.length ? `Depends on ${library.dependencies.join(", ")}` : "No library dependency"}</small>
+              </div>
+              <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} />
+            </a>
+          ))}
+        </div>
+      </section>
+    ))}
+
+    {remainingLibraries.length > 0 && (
+      <section class="library-group panel">
+        <div class="group-heading">
+          <div>
+            <div class="eyebrow">Other libraries</div>
+            <h2>Additional libraries that do not fit the main groups yet.</h2>
+          </div>
+          <span>{remainingLibraries.length} libraries</span>
+        </div>
+        <div class="library-matrix">
+          {remainingLibraries.map((library) => (
+            <a class="library-cell" href={withBase(`/libraries/${library.slug}/`)}>
+              <LibraryIcon slug={library.slug} size="sm" />
+              <div>
+                <strong>{library.title}</strong>
+                <p>{library.summary}</p>
+                <small>{library.dependencies.length ? `Depends on ${library.dependencies.join(", ")}` : "No library dependency"}</small>
+              </div>
+              <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} />
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .library-landing {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.3fr);
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .library-hero-copy h1 {
+    margin: 0;
+    max-width: 15ch;
+    font-size: clamp(3rem, 6vw, 5.8rem);
+    line-height: 0.98;
+    letter-spacing: 0;
+  }
+
+  .library-hero-copy p {
+    margin: 1rem 0 0;
+    max-width: 54rem;
+    color: var(--muted-strong);
+    font-size: 1.12rem;
+    line-height: 1.65;
+  }
+
+  .catalog-summary {
+    padding: 1rem;
+  }
+
+  .catalog-summary strong,
+  .catalog-summary span,
+  .catalog-summary small {
+    display: block;
+  }
+
+  .catalog-summary strong {
+    color: var(--accent-cool);
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  .catalog-summary span {
+    margin-top: 0.45rem;
+    font-weight: 750;
+  }
+
+  .catalog-summary small {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .library-groups {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .library-group {
+    padding: 1rem;
+  }
+
+  .group-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1rem;
+  }
+
+  .group-heading h2 {
+    margin: 0.35rem 0 0;
+    max-width: 58rem;
+    color: var(--muted-strong);
+    font-size: clamp(1.25rem, 2vw, 1.7rem);
+    line-height: 1.35;
+    font-weight: 650;
+  }
+
+  .group-heading > span {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  .library-matrix {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .library-cell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.8rem;
+    align-items: start;
+    padding: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface-strong) 58%, transparent);
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .library-cell:hover {
+    border-color: color-mix(in srgb, var(--accent-strong) 36%, var(--border));
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface-strong));
+  }
+
+  .library-cell strong,
+  .library-cell p,
+  .library-cell small {
+    display: block;
+  }
+
+  .library-cell p {
+    margin: 0.35rem 0;
+    color: var(--muted-strong);
+    line-height: 1.5;
+  }
+
+  .library-cell small {
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 950px) {
+    .library-landing,
+    .library-matrix {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .library-cell {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .library-cell .maturity-badge {
+      grid-column: 2;
+      justify-self: start;
+    }
+
+    .group-heading {
+      flex-direction: column;
+    }
+  }
+</style>

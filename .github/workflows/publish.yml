@@ -1,0 +1,121 @@
+name: Publish site
+
+on:
+  workflow_dispatch:
+    inputs:
+      sane_cpp_ref:
+        description: Sane C++ ref to publish
+        required: false
+        default: main
+  repository_dispatch:
+    types: [sane-cpp-main-updated]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-site
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout website source
+        uses: actions/checkout@v4
+
+      - name: Resolve Sane C++ ref
+        id: sane-ref
+        run: |
+          if [ -n "${{ github.event.client_payload.sha }}" ]; then
+            echo "ref=${{ github.event.client_payload.sha }}" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ inputs.sane_cpp_ref }}" ]; then
+            echo "ref=${{ inputs.sane_cpp_ref }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout Sane C++ Libraries
+        uses: actions/checkout@v4
+        with:
+          repository: Pagghiu/SaneCppLibraries
+          ref: ${{ steps.sane-ref.outputs.ref }}
+          path: SaneCppLibraries
+
+      - name: Checkout generated output repository
+        uses: actions/checkout@v4
+        with:
+          repository: Pagghiu/pagghiu.github.io
+          path: pagghiu.github.io
+          token: ${{ secrets.PAGES_OUTPUT_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Restore clang-binaries cache
+        uses: actions/cache/restore@v4
+        with:
+          path: SaneCppLibraries/_Build/_PackagesCache/clang-binaries
+          key: sc-packages-docs-clang-binaries-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('SaneCppLibraries/Tools/SC-package-versions.txt') }}
+          restore-keys: |
+            sc-packages-docs-clang-binaries-v2-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Restore doxygen cache
+        uses: actions/cache/restore@v4
+        with:
+          path: SaneCppLibraries/_Build/_PackagesCache/doxygen
+          key: sc-packages-docs-doxygen-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('SaneCppLibraries/Tools/SC-package-versions.txt') }}
+          restore-keys: |
+            sc-packages-docs-doxygen-v2-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Restore doxygen-awesome-css cache
+        uses: actions/cache/restore@v4
+        with:
+          path: SaneCppLibraries/_Build/_PackagesCache/doxygen-awesome-css
+          key: sc-packages-docs-doxygen-awesome-css-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('SaneCppLibraries/Tools/SC-package-versions.txt') }}
+          restore-keys: |
+            sc-packages-docs-doxygen-awesome-css-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            graphviz \
+            liburing-dev \
+            libgles2-mesa-dev \
+            libx11-dev \
+            libxi-dev \
+            libxcursor-dev
+
+      - name: Install website dependencies
+        run: npm ci
+
+      - name: Build website with Sane C++ docs and coverage
+        env:
+          SANE_CPP_REPO: ${{ github.workspace }}/SaneCppLibraries
+          SANE_CPP_COMMIT: ${{ steps.sane-ref.outputs.ref }}
+          WEBSITE_SOURCE_COMMIT: ${{ github.sha }}
+        run: npm run build:publish
+
+      - name: Update generated output repository
+        env:
+          PUBLISH_REPO: ${{ github.workspace }}/pagghiu.github.io
+        run: npm run publish:local
+
+      - name: Commit generated output
+        working-directory: pagghiu.github.io
+        run: |
+          if [ -z "$(git status --short)" ]; then
+            echo "No generated changes to publish."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish site from Sane C++ ${{ steps.sane-ref.outputs.ref }}"
+          git push

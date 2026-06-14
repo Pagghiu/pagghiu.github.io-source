@@ -1,0 +1,156 @@
+---
+import { withBase } from "../lib/base";
+
+const pagefindBase = withBase("/");
+---
+
+<button class="search-trigger" type="button" data-search-open>
+  <span>Search the site</span>
+  <kbd>/</kbd>
+</button>
+
+<dialog class="search-dialog panel" data-search-dialog data-pagefind-base={pagefindBase}>
+  <form method="dialog" class="search-shell">
+    <div class="search-header">
+      <input type="search" name="q" placeholder="Search libraries, guides, blog, reference..." autocomplete="off" data-search-input />
+      <button type="submit" class="button">Close</button>
+    </div>
+    <div class="search-results" data-search-results></div>
+  </form>
+</dialog>
+
+<script is:inline>
+  const dialog = document.querySelector("[data-search-dialog]");
+  const openButton = document.querySelector("[data-search-open]");
+  const input = document.querySelector("[data-search-input]");
+  const results = document.querySelector("[data-search-results]");
+  const searchBase = dialog?.dataset.pagefindBase || "/";
+  let pagefind;
+
+  async function loadPagefind() {
+    if (!pagefind) {
+      pagefind = await import(`${searchBase}pagefind/pagefind.js`);
+    }
+    return pagefind;
+  }
+
+  async function runSearch(query) {
+    if (!results) return;
+    if (!query.trim()) {
+      results.innerHTML = '<p class="copy-muted">Type to search across libraries, guides, skills, and generated reference.</p>';
+      return;
+    }
+    const pagefindApi = await loadPagefind();
+    const search = await pagefindApi.search(query);
+    const items = await Promise.all(search.results.slice(0, 8).map((item) => item.data()));
+    results.innerHTML = items.length
+      ? items
+          .map(
+            (item) => `
+              <a class="search-result" href="${item.url}">
+                <strong>${item.meta.title ?? item.url}</strong>
+                <span>${item.excerpt ?? ""}</span>
+              </a>`
+          )
+          .join("")
+      : '<p class="copy-muted">No results yet. Try a library name, guide, or feature.</p>';
+  }
+
+  function openSearch() {
+    dialog?.showModal();
+    results.innerHTML = '<p class="copy-muted">Type to search across libraries, guides, skills, and generated reference.</p>';
+    setTimeout(() => input?.focus(), 20);
+  }
+
+  openButton?.addEventListener("click", openSearch);
+  input?.addEventListener("input", (event) => runSearch(event.currentTarget.value));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "/" && !event.metaKey && !event.ctrlKey) {
+      const target = event.target;
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
+      event.preventDefault();
+      openSearch();
+    }
+    if (event.key === "Escape" && dialog?.open) {
+      dialog.close();
+    }
+  });
+</script>
+
+<style>
+  .search-trigger {
+    width: clamp(180px, 17vw, 240px);
+    min-width: 180px;
+    justify-content: space-between;
+    padding-inline: 1rem;
+  }
+
+  kbd {
+    padding: 0.25rem 0.45rem;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 72%, transparent);
+    border: 1px solid var(--border);
+    color: var(--muted-strong);
+  }
+
+  .search-dialog {
+    width: min(900px, calc(100% - 1.5rem));
+    padding: 0;
+    border: none;
+  }
+
+  .search-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(10px);
+  }
+
+  .search-shell {
+    padding: 1rem;
+  }
+
+  .search-header {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .search-header input {
+    flex: 1;
+    min-width: 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+    color: var(--text);
+    padding: 1rem 1.1rem;
+    font-size: 1rem;
+  }
+
+  .search-results {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .search-result {
+    display: grid;
+    gap: 0.3rem;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  }
+
+  .search-result span {
+    color: var(--muted);
+  }
+
+  @media (max-width: 720px) {
+    .search-trigger {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .search-header {
+      flex-direction: column;
+    }
+  }
+</style>

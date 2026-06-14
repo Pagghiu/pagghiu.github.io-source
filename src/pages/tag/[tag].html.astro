@@ -1,0 +1,85 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+import { getAllTags, getPostsForTag } from "../../lib/blog-data";
+
+export function getStaticPaths() {
+  return getAllTags().map((tag) => ({
+    params: { tag: tag.slug },
+    props: { tag, posts: getPostsForTag(tag.slug) }
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BlogLayout title={`${tag.label} - Sane Coding Blog`} description={`Posts tagged ${tag.label}`}>
+  <section class="shell tag-page">
+    <a class="back-link" href="/">Blog</a>
+    <h1>{tag.label}</h1>
+    <div class="post-list">
+      {posts.map((post) => (
+        <article class="post-row">
+          <time datetime={post.date}>{post.date}</time>
+          <div>
+            <h2><a href={`/site/blog/${post.slug}.html`}>{post.title}</a></h2>
+            <p>{post.summary}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</BlogLayout>
+
+<style>
+  .tag-page {
+    padding-top: 3rem;
+  }
+
+  .back-link {
+    color: #135bc7;
+    font-weight: 750;
+  }
+
+  h1 {
+    margin: 0.7rem 0 1.8rem;
+    color: #1d2430;
+    font-size: clamp(2.5rem, 7vw, 4.8rem);
+  }
+
+  .post-list {
+    display: grid;
+    border-top: 1px solid rgba(40, 54, 76, 0.12);
+  }
+
+  .post-row {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 1.4rem;
+    padding: 1.3rem 0;
+    border-bottom: 1px solid rgba(40, 54, 76, 0.12);
+  }
+
+  time {
+    color: #657184;
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  h2 {
+    margin: 0 0 0.55rem;
+    color: #1d2430;
+    font-size: 1.35rem;
+  }
+
+  p {
+    margin: 0;
+    color: #657184;
+    line-height: 1.65;
+  }
+
+  @media (max-width: 720px) {
+    .post-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,284 @@
+---
+import Search from "../components/Search.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import LogoMark from "../components/LogoMark.astro";
+import "../styles/global.css";
+import { withBase } from "../lib/base";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Sane C++ Libraries is a cross-platform C++ toolbox maintained through Prompt Requests, repo skills, and build workflows agents can run." } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const nav = [
+  { href: "/libraries/", label: "Libraries" },
+  { href: "/guides/", label: "Guides" },
+  { href: "/skills/", label: "Skills" },
+  { href: "https://pagghiu.github.io", label: "Blog", external: true },
+  { href: "/reference/", label: "Reference" },
+  { href: "/community/", label: "Community" }
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical.toString()} />
+    <link rel="canonical" href={canonical.toString()} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;650;750;850&family=JetBrains+Mono:wght@500;700&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet" />
+    <script is:inline>
+      (() => {
+        const savedTheme = localStorage.getItem("sc-theme");
+        const theme = savedTheme === "light" || savedTheme === "dark"
+          ? savedTheme
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header" data-site-header>
+      <div class="shell header-row">
+        <a class="brand" href={withBase("/")}>
+          <LogoMark size={46} />
+          <span>
+            <strong>Sane C++ Libraries</strong>
+            <small>Platform Abstraction C++ Libraries for Agents</small>
+          </span>
+        </a>
+        <div class="nav-cluster" data-nav-cluster>
+          <nav class="desktop-nav" aria-label="Primary">
+            {nav.map((item) => (
+              <a href={item.external ? item.href : withBase(item.href)} target={item.external ? "_blank" : undefined} rel={item.external ? "noreferrer" : undefined}>{item.label}</a>
+            ))}
+          </nav>
+          <div class="header-actions">
+            <Search />
+            <ThemeToggle />
+            <a class="button primary" href="https://github.com/Pagghiu/SaneCppLibraries">View GitHub</a>
+          </div>
+        </div>
+        <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-label="Open navigation">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="shell footer-grid">
+        <div>
+          <div class="eyebrow">Sane C++</div>
+          <h2>Small cross-platform C++ libraries for coding agents.</h2>
+          <p class="copy-muted">
+            A compact set of independent libraries for building efficient programs with coding agents.
+          </p>
+        </div>
+        <div class="footer-links">
+          <a href={withBase("/libraries/")}>Libraries</a>
+          <a href={withBase("/guides/")}>Guides</a>
+          <a href={withBase("/reference/")}>Reference</a>
+          <a href="https://github.com/Pagghiu/SaneCppLibraries/discussions">Discussions</a>
+          <a href="https://discord.gg/tyBfFp33Z6">Discord</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<script is:inline>
+  const siteHeader = document.querySelector("[data-site-header]");
+  const menuToggle = document.querySelector("[data-menu-toggle]");
+  const menuIcon = menuToggle?.querySelector(".material-symbols-outlined");
+
+  menuToggle?.addEventListener("click", () => {
+    const isOpen = siteHeader?.classList.toggle("menu-open") ?? false;
+    menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    menuToggle.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
+    if (menuIcon) menuIcon.textContent = isOpen ? "close" : "menu";
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(20px);
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+  }
+
+  .header-row {
+    min-height: var(--nav-height);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .brand strong {
+    display: block;
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  .brand small {
+    display: block;
+    color: var(--muted);
+    font-size: 0.79rem;
+    max-width: 18rem;
+  }
+
+  .nav-cluster {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 1.2rem;
+    min-width: 0;
+  }
+
+  .desktop-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+
+  .desktop-nav a {
+    color: var(--muted-strong);
+    font-weight: 700;
+    white-space: nowrap;
+    font-size: 0.98rem;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.65rem;
+    align-items: center;
+  }
+
+  .menu-toggle {
+    display: none;
+    width: 2.8rem;
+    height: 2.8rem;
+    padding: 0;
+    border-radius: 8px;
+  }
+
+  .header-actions :global(.button.primary) {
+    white-space: nowrap;
+    padding-inline: 1.1rem;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 0;
+    background: var(--footer-bg);
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+
+  .footer-grid h2 {
+    margin: 0.25rem 0 0.8rem;
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+  }
+
+  .footer-links {
+    display: grid;
+    gap: 0.8rem;
+    justify-items: start;
+  }
+
+  .footer-links a {
+    color: var(--muted-strong);
+  }
+
+  @media (max-width: 1100px) {
+    .header-row {
+      grid-template-columns: 1fr auto;
+      min-height: 68px;
+      padding: 0.55rem 0;
+    }
+
+    .menu-toggle {
+      display: inline-flex;
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .nav-cluster {
+      display: none;
+      grid-column: 1 / -1;
+      grid-row: 2;
+      padding: 0.8rem 0 0.65rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .site-header.menu-open .nav-cluster {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .desktop-nav {
+      justify-content: start;
+      flex-wrap: wrap;
+      gap: 0.7rem 1rem;
+    }
+
+    .header-actions {
+      flex-wrap: wrap;
+      align-items: stretch;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .brand img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .brand small {
+      display: none;
+    }
+
+    .desktop-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .desktop-nav a {
+      padding: 0.3rem 0;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

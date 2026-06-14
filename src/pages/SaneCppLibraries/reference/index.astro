@@ -1,0 +1,46 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { withBase } from "../../../lib/base";
+---
+
+<BaseLayout title="Reference | Sane C++ Libraries" description="Generated reference docs, compatibility routes, single-file tooling, and coverage artifacts.">
+  <section class="shell page-hero">
+    <div class="section-heading">
+      <div class="eyebrow">Reference Layer</div>
+      <h1>Reference and generated docs</h1>
+      <p>
+        Doxygen output remains available for API detail, snippets, graphs, coverage, and compatibility links.
+      </p>
+    </div>
+    <div class="card-grid grid">
+      <a class="card" href={withBase("/reference/doxygen/")}>
+        <strong>Doxygen reference</strong>
+        <p>Open the generated documentation subtree that is copied into the final Pages artifact.</p>
+      </a>
+      <a class="card" href={withBase("/reference/doxygen/page_single_file_libs.html")}>
+        <strong>Single-file library browser</strong>
+        <p>Generate the standalone library headers used by the single-file integration path.</p>
+      </a>
+      <a class="card" href={withBase("/reference/doxygen/coverage/")}>
+        <strong>Coverage reports</strong>
+        <p>Coverage stays shipped alongside the generated docs after the existing CI steps run.</p>
+      </a>
+      <a class="card" href={withBase("/libraries/")}>
+        <strong>Curated library pages</strong>
+        <p>Start from the library boundary before diving into generated symbols.</p>
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

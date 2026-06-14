@@ -1,0 +1,48 @@
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
+  <span class="theme-icon" aria-hidden="true">◐</span>
+  <span class="theme-label">Theme</span>
+</button>
+
+<script is:inline>
+  const themeStorageKey = "sc-theme";
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    const button = document.querySelector("[data-theme-toggle]");
+    const label = button?.querySelector(".theme-label");
+    const icon = button?.querySelector(".theme-icon");
+    if (label) {
+      label.textContent = theme === "light" ? "Light" : "Dark";
+    }
+    if (icon) {
+      icon.textContent = theme === "light" ? "☀" : "☾";
+    }
+  }
+
+  function getInitialTheme() {
+    const saved = localStorage.getItem(themeStorageKey);
+    if (saved === "light" || saved === "dark") return saved;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  applyTheme(getInitialTheme());
+
+  document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
+    const current = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+    const next = current === "light" ? "dark" : "light";
+    localStorage.setItem(themeStorageKey, next);
+    applyTheme(next);
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    min-width: 5.8rem;
+    justify-content: center;
+  }
+
+  .theme-label {
+    min-width: 2.5rem;
+    text-align: left;
+  }
+</style>

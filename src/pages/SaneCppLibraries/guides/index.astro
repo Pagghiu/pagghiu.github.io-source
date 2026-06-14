@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getGuides } from "../../../lib/site-data";
+import { withBase } from "../../../lib/base";
+
+const guides = getGuides();
+---
+
+<BaseLayout title="Guides | Sane C++ Libraries" description="Practical guides for using, integrating, building, and contributing to Sane C++ Libraries.">
+  <section class="shell page-hero">
+    <div class="section-heading">
+      <div class="eyebrow">Guides</div>
+      <h1>Practical guides</h1>
+      <p>These pages are sourced from the repo docs and organized around common tasks.</p>
+    </div>
+    <div class="card-grid grid">
+      {guides.map((guide) => (
+        <a class="card" href={withBase(`/guides/${guide.slug}/`)}>
+          <strong>{guide.title}</strong>
+          <p>{guide.summary}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
