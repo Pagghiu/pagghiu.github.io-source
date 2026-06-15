@@ -2,24 +2,24 @@
 const tabs = [
   {
     id: "single-file",
-    label: "Single file",
-    copy: "Vendor one library with the release header or generate a fresh standalone amalgamation.",
+    label: "Small: single file",
+    copy: "Start with the simplest model: one generated header for one library.",
     code: `#include "SaneCppFoundation.h"
 #define SANE_CPP_IMPLEMENTATION
 #include "SaneCppFoundation.h"`
   },
   {
     id: "repo-checkout",
-    label: "Repo checkout",
-    copy: "Vendor the repository, add SC.cpp to your build, and keep the same library boundaries an agent will see in the repo.",
+    label: "Medium: unity build",
+    copy: "Clone the repo, add SC.cpp to your build, and include the libraries you need.",
     code: `git clone https://github.com/Pagghiu/SaneCppLibraries.git
 # add SC.cpp to your build
 # include Libraries/Foundation/*.h`
   },
   {
     id: "build-integration",
-    label: "Build integration",
-    copy: "Use SC::Build when you want examples, tests, native builds, cross targets, or package-managed toolchains.",
+    label: "Big: SC::Build",
+    copy: "Use SC::Build when you want the full project workflow: examples, tests, native builds, cross targets, and package-managed toolchains.",
     code: `./SC.sh build configure
 ./SC.sh build compile SCTest
 ./SC.sh build run SCExample`

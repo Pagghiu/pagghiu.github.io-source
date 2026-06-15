@@ -29,8 +29,7 @@ Validation: run the focused HttpClient tests in Debug`;
       <div class="hero-copy">
         <h1>Sane C++ Libraries</h1>
         <p class="hero-lede">
-          Cross-platform C++ libraries maintained through agentic development: good issues, reusable prompts, repository
-          skills, focused validation, and constraints that keep generated changes under control.
+          Cross-platform C++ libraries built for agents.
         </p>
         <div class="constraint-rail" aria-label="Core constraints">
           {constraints.map((constraint) => <span>{constraint}</span>)}
@@ -77,30 +76,45 @@ Validation: run the focused HttpClient tests in Debug`;
     ))}
   </section>
 
+  <section class="shell dependency-map-section panel">
+    <div class="dependency-map-copy">
+      <div class="eyebrow">Dependency map</div>
+      <h2>Library graph</h2>
+      <p>
+        Most libraries have no library-level dependency. A few higher-level libraries build on those small
+        pillars, so you can pick one useful piece without switching your whole project to Sane C++.
+      </p>
+    </div>
+    <div class="dependency-map-frame">
+      <img src="/images/dependencies/SaneCppLibrariesDependencies.svg" alt="Dependency map for Sane C++ Libraries" loading="lazy" />
+    </div>
+  </section>
+
   <section class="shell section operating-model">
     <div class="section-heading">
-      <div class="eyebrow">Agentic contribution model</div>
-      <h2>Issues and prompts are first-class contributions</h2>
+      <div class="eyebrow">The reasons</div>
+      <h2>Why this shape?</h2>
       <p>
-        A useful contribution can be a clear Prompt Request: what should change, why it matters, which library or
-        platform is involved, which constraints apply, and how the maintainer should replay or validate the work.
+        Sane C++ Libraries tries to blend the compactness of single-file libraries with the convenience of a
+        small runtime. You can start with one library, a unity-build checkout, or the full SC::Build workflow
+        without turning your project into a framework.
       </p>
     </div>
     <div class="model-grid">
       <article class="model-card">
         <span class="material-symbols-outlined" aria-hidden="true">rule</span>
-        <h3>Prompt Request before code</h3>
-        <p>A well-written issue can be the whole contribution when it includes intent, reproduction, constraints, and a reusable prompt.</p>
+        <h3>Independent libraries</h3>
+        <p>A small amount of code duplication is accepted in order to keep many libraries isolated.</p>
       </article>
       <article class="model-card">
         <span class="material-symbols-outlined" aria-hidden="true">schema</span>
-        <h3>Skill before source dive</h3>
-        <p>Agents should start from <code>AGENTS.md</code>, the repository skill, and the relevant library guidance before producing code.</p>
+        <h3>Working like a runtime</h3>
+        <p>It brings ready-to-use runtime pieces that C++ projects often miss, closer to what developers expect from JavaScript or Python.</p>
       </article>
       <article class="model-card">
         <span class="material-symbols-outlined" aria-hidden="true">task_alt</span>
-        <h3>Rules keep agents contained</h3>
-        <p>Explicit errors, caller-owned memory, library independence, and focused tests make generated changes easier to reject or replay.</p>
+        <h3>Composable by design</h3>
+        <p>Libraries stay useful on their own, but their explicit boundaries make them easy to combine when a project grows.</p>
       </article>
     </div>
   </section>
@@ -126,8 +140,8 @@ Validation: run the focused HttpClient tests in Debug`;
 
     <aside class="adoption-panel panel">
       <div class="section-heading compact">
-        <div class="eyebrow">Entry points</div>
-        <h2>Single File, unity build repo checkout or full build system</h2>
+        <div class="eyebrow">Investment level</div>
+        <h2>Small, medium or big</h2>
       </div>
       <InstallTabs />
     </aside>
@@ -137,7 +151,7 @@ Validation: run the focused HttpClient tests in Debug`;
     <div class="section-heading heading-with-link">
       <div>
         <div class="eyebrow">Libraries</div>
-        <h2>Independent libraries that work together like a runtime</h2>
+        <h2>Not a framework</h2>
         <p>The project is not a framework. The libraries try to stay as independent as possible, even at the cost of some internal duplication, while still working smoothly together. You can use one or two of them without pulling in the whole codebase.</p>
       </div>
       <a class="button" href={withBase("/libraries/")}>
@@ -162,8 +176,8 @@ Validation: run the focused HttpClient tests in Debug`;
   <section class="shell section">
     <div class="section-heading">
       <div class="eyebrow">Catalog</div>
-      <h2>Everything currently in the tree</h2>
-      <p>A compact list for planning Prompt Requests and checking what an agent-generated change would touch.</p>
+      <h2>Full list</h2>
+      <p>Use the catalog to pick the smallest useful building block for your project or Prompt Request.</p>
     </div>
     <div class="library-table panel">
       <div class="library-table-head">
@@ -463,6 +477,40 @@ Validation: run the focused HttpClient tests in Debug`;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.8rem;
+  }
+
+  .dependency-map-section {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+  }
+
+  .dependency-map-copy h2 {
+    margin: 0.35rem 0 0;
+    font-size: clamp(1.55rem, 3vw, 2.4rem);
+    line-height: 1.12;
+  }
+
+  .dependency-map-copy p {
+    margin: 0.8rem 0 0;
+    max-width: 62rem;
+    color: var(--muted-strong);
+    line-height: 1.65;
+  }
+
+  .dependency-map-frame {
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .dependency-map-frame img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    min-width: 760px;
   }
 
   .library-tile {
