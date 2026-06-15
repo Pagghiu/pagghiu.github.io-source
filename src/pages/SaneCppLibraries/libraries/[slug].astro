@@ -96,10 +96,14 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
     gap: 1.25rem;
     margin-top: 1.25rem;
+    min-width: 0;
   }
 
   .article {
+    min-width: 0;
+    max-width: 100%;
     padding: 1.5rem;
+    overflow: hidden;
   }
 
   .sidebar {

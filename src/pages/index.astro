@@ -57,10 +57,12 @@ const posts = getBlogPosts();
     display: grid;
     gap: 2rem;
     min-width: 0;
+    max-width: 100%;
   }
 
   .blog-card {
     min-width: 0;
+    max-width: 100%;
     padding: clamp(1.25rem, 3vw, 2.1rem);
     border-radius: 8px;
     border: 1px solid var(--border);
@@ -112,6 +114,7 @@ const posts = getBlogPosts();
     color: var(--muted-strong);
     font-size: 1.05rem;
     line-height: 1.75;
+    overflow-wrap: anywhere;
   }
 
   .continue-link {

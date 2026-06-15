@@ -105,7 +105,7 @@ const hasToc = toc.length > 0;
   :global(.blog-body) {
     color: var(--text);
     background: var(--bg);
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   :global(.blog-body)::before {
@@ -167,6 +167,8 @@ const hasToc = toc.length > 0;
     grid-template-columns: minmax(13rem, 16rem) minmax(0, 820px);
     justify-content: center;
     gap: 2.2rem;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .blog-main.has-toc .blog-frame {
@@ -179,6 +181,7 @@ const hasToc = toc.length > 0;
 
   .blog-content {
     min-width: 0;
+    max-width: 100%;
   }
 
   .blog-sidebar,

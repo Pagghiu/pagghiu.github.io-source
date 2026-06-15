@@ -64,6 +64,7 @@ html[data-theme="light"] {
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -74,6 +75,7 @@ body {
     radial-gradient(circle at top right, color-mix(in srgb, var(--accent-cool) 18%, transparent), transparent 24%),
     linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 42%, var(--bg)) 0%, var(--bg) 34%, color-mix(in srgb, var(--accent) 4%, var(--bg)) 100%);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -204,9 +206,16 @@ button:hover {
 }
 
 .prose {
+  min-width: 0;
   font-size: 1.05rem;
   line-height: 1.8;
   color: var(--muted-strong);
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.prose > * {
+  max-width: 100%;
 }
 
 .prose h1,
@@ -232,10 +241,21 @@ button:hover {
 }
 
 .prose table {
-  width: 100%;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
   margin: 1.6rem 0;
   font-size: 0.96rem;
+}
+
+.prose code {
+  overflow-wrap: anywhere;
+}
+
+.prose pre code {
+  overflow-wrap: normal;
 }
 
 .prose th,
