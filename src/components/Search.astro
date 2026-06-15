@@ -1,7 +1,5 @@
 ---
-import { withBase } from "../lib/base";
-
-const pagefindBase = withBase("/");
+const pagefindBase = "/";
 ---
 
 <button class="search-trigger" type="button" data-search-open>
@@ -34,26 +32,39 @@ const pagefindBase = withBase("/");
     return pagefind;
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
   async function runSearch(query) {
     if (!results) return;
     if (!query.trim()) {
       results.innerHTML = '<p class="copy-muted">Type to search across libraries, guides, skills, and generated reference.</p>';
       return;
     }
-    const pagefindApi = await loadPagefind();
-    const search = await pagefindApi.search(query);
-    const items = await Promise.all(search.results.slice(0, 8).map((item) => item.data()));
-    results.innerHTML = items.length
-      ? items
-          .map(
-            (item) => `
-              <a class="search-result" href="${item.url}">
-                <strong>${item.meta.title ?? item.url}</strong>
-                <span>${item.excerpt ?? ""}</span>
-              </a>`
-          )
-          .join("")
-      : '<p class="copy-muted">No results yet. Try a library name, guide, or feature.</p>';
+    try {
+      const pagefindApi = await loadPagefind();
+      const search = await pagefindApi.search(query);
+      const items = await Promise.all(search.results.slice(0, 8).map((item) => item.data()));
+      results.innerHTML = items.length
+        ? items
+            .map(
+              (item) => `
+                <a class="search-result" href="${escapeHtml(item.url)}">
+                  <strong>${escapeHtml(item.meta.title ?? item.url)}</strong>
+                  <span>${item.excerpt ?? ""}</span>
+                </a>`
+            )
+            .join("")
+        : '<p class="copy-muted">No results yet. Try a library name, guide, or feature.</p>';
+    } catch (error) {
+      console.warn("Pagefind search failed", error);
+      results.innerHTML = '<p class="copy-muted">Search index is not available. Run a production build before testing search locally.</p>';
+    }
   }
 
   function openSearch() {

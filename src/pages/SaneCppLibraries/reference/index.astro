@@ -13,21 +13,33 @@ import { withBase } from "../../../lib/base";
       </p>
     </div>
     <div class="card-grid grid">
-      <a class="card" href={withBase("/reference/doxygen/")}>
-        <strong>Doxygen reference</strong>
-        <p>Open the generated documentation subtree that is copied into the final Pages artifact.</p>
+      <a class="card reference-card" href={withBase("/reference/doxygen/")}>
+        <span class="material-symbols-outlined" aria-hidden="true">description</span>
+        <div>
+          <strong>Doxygen reference</strong>
+          <p>Open the generated documentation subtree that is copied into the final Pages artifact.</p>
+        </div>
       </a>
-      <a class="card" href={withBase("/reference/doxygen/page_single_file_libs.html")}>
-        <strong>Single-file library browser</strong>
-        <p>Generate the standalone library headers used by the single-file integration path.</p>
+      <a class="card reference-card" href={withBase("/reference/doxygen/page_single_file_libs.html")}>
+        <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+        <div>
+          <strong>Single-file library browser</strong>
+          <p>Generate the standalone library headers used by the single-file integration path.</p>
+        </div>
       </a>
-      <a class="card" href={withBase("/reference/doxygen/coverage/")}>
-        <strong>Coverage reports</strong>
-        <p>Coverage stays shipped alongside the generated docs after the existing CI steps run.</p>
+      <a class="card reference-card" href={withBase("/reference/doxygen/coverage/")}>
+        <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
+        <div>
+          <strong>Coverage reports</strong>
+          <p>Coverage stays shipped alongside the generated docs after the existing CI steps run.</p>
+        </div>
       </a>
-      <a class="card" href={withBase("/libraries/")}>
-        <strong>Curated library pages</strong>
-        <p>Start from the library boundary before diving into generated symbols.</p>
+      <a class="card reference-card" href={withBase("/libraries/")}>
+        <span class="material-symbols-outlined" aria-hidden="true">account_tree</span>
+        <div>
+          <strong>Curated library pages</strong>
+          <p>Start from the library boundary before diving into generated symbols.</p>
+        </div>
       </a>
     </div>
   </section>
@@ -36,6 +48,30 @@ import { withBase } from "../../../lib/base";
 <style>
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reference-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.95rem;
+    align-items: start;
+  }
+
+  .reference-card .material-symbols-outlined {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: var(--accent-cool);
+    background: color-mix(in srgb, var(--accent-cool) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-cool) 22%, var(--border));
+    font-size: 1.22rem;
+  }
+
+  .reference-card p {
+    margin-top: 0.55rem;
   }
 
   @media (max-width: 900px) {

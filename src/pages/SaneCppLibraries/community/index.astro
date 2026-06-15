@@ -11,21 +11,33 @@ import { withBase } from "../../../lib/base";
       <p>Use the guides for onboarding, then drop into the reference and source tree when you need exact detail.</p>
     </div>
     <div class="card-grid grid">
-      <a class="card" href={withBase("/guides/building-contributor/")}>
-        <strong>Contributor build guide</strong>
-        <p>Generate projects, run tests, and build examples across supported platforms.</p>
+      <a class="card community-card" href={withBase("/guides/building-contributor/")}>
+        <span class="material-symbols-outlined" aria-hidden="true">engineering</span>
+        <div>
+          <strong>Contributor build guide</strong>
+          <p>Generate projects, run tests, and build examples across supported platforms.</p>
+        </div>
       </a>
-      <a class="card" href={withBase("/guides/coding-style/")}>
-        <strong>Coding style</strong>
-        <p>Readability, correctness, warnings-as-errors, and the project’s preferred C++ subset.</p>
+      <a class="card community-card" href={withBase("/guides/coding-style/")}>
+        <span class="material-symbols-outlined" aria-hidden="true">format_align_left</span>
+        <div>
+          <strong>Coding style</strong>
+          <p>Readability, correctness, warnings-as-errors, and the project’s preferred C++ subset.</p>
+        </div>
       </a>
-      <a class="card" href="https://discord.gg/tyBfFp33Z6">
-        <strong>Discord</strong>
-        <p>Join the broader Sane Coding community and talk through project direction.</p>
+      <a class="card community-card" href="https://discord.gg/tyBfFp33Z6">
+        <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+        <div>
+          <strong>Discord</strong>
+          <p>Join the broader Sane Coding community and talk through project direction.</p>
+        </div>
       </a>
-      <a class="card" href="https://github.com/Pagghiu/SaneCppLibraries/discussions">
-        <strong>GitHub Discussions</strong>
-        <p>Open-ended conversations, proposals, and public collaboration.</p>
+      <a class="card community-card" href="https://github.com/Pagghiu/SaneCppLibraries/discussions">
+        <span class="material-symbols-outlined" aria-hidden="true">question_answer</span>
+        <div>
+          <strong>GitHub Discussions</strong>
+          <p>Open-ended conversations, proposals, and public collaboration.</p>
+        </div>
       </a>
     </div>
   </section>
@@ -34,6 +46,30 @@ import { withBase } from "../../../lib/base";
 <style>
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .community-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.95rem;
+    align-items: start;
+  }
+
+  .community-card .material-symbols-outlined {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: var(--accent-cool);
+    background: color-mix(in srgb, var(--accent-cool) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-cool) 22%, var(--border));
+    font-size: 1.22rem;
+  }
+
+  .community-card p {
+    margin-top: 0.55rem;
   }
 
   @media (max-width: 900px) {

@@ -11,6 +11,7 @@ const websiteRoot = path.dirname(fileURLToPath(import.meta.url));
 const defaultSaneCppRepo = path.resolve(websiteRoot, "..", "SC-website");
 const saneCppRepo = path.resolve(process.env.SANE_CPP_REPO ?? defaultSaneCppRepo);
 const doxygenDir = path.join(saneCppRepo, "_Build", "_Documentation", "docs");
+const pagefindDir = path.join(websiteRoot, "dist", "pagefind");
 
 function contentTypeFor(filePath) {
   const extension = path.extname(filePath).toLowerCase();
@@ -45,6 +46,38 @@ function serveDoxygenInDev() {
         const safePath = path.normalize(relativePath).replace(/^(\.\.[/\\])+/, "");
         const filePath = path.join(doxygenDir, safePath);
         if (!filePath.startsWith(doxygenDir) || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+          next();
+          return;
+        }
+
+        response.setHeader("Content-Type", contentTypeFor(filePath));
+        fs.createReadStream(filePath).pipe(response);
+      });
+    }
+  };
+}
+
+function servePagefindInDev() {
+  const routePrefix = "/pagefind/";
+  return {
+    name: "serve-pagefind-in-dev",
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        if (!request.url) {
+          next();
+          return;
+        }
+
+        const requestPath = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+        if (!requestPath.startsWith(routePrefix)) {
+          next();
+          return;
+        }
+
+        const relativePath = requestPath.slice(routePrefix.length);
+        const safePath = path.normalize(relativePath).replace(/^(\.\.[/\\])+/, "");
+        const filePath = path.join(pagefindDir, safePath);
+        if (!filePath.startsWith(pagefindDir) || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
           next();
           return;
         }
@@ -97,7 +130,7 @@ export default defineConfig({
   output: "static",
   integrations: [mdx(), sitemap()],
   vite: {
-    plugins: [serveLegacyRedirectsInDev(), serveDoxygenInDev()]
+    plugins: [serveLegacyRedirectsInDev(), serveDoxygenInDev(), servePagefindInDev()]
   },
   markdown: {
     shikiConfig: {

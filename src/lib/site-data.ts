@@ -23,6 +23,7 @@ export type Guide = {
   slug: string;
   title: string;
   summary: string;
+  icon: string;
   pageId: string;
   oldPath: string;
   sourcePath: string;
@@ -63,8 +64,80 @@ export type SkillCard = {
   sourceUrl: string;
 };
 
+export type SkillStructure = {
+  rootRelative: string;
+  guideCount: number;
+  referenceFileCount: number;
+  groups: Array<{
+    title: string;
+    icon: string;
+    items: string[];
+  }>;
+};
+
 let docsHtmlCache: Array<{ relativePath: string; contents: string }> | null = null;
 const symbolLinkCache = new Map<string, string | null>();
+
+const guideMetadata: Record<string, { summary: string; icon: string; intro?: string; fallback?: string }> = {
+  page_build: {
+    icon: "construction",
+    summary: "Describe builds in C++ and use SC::Build to generate projects or build directly through the native backend."
+  },
+  page_build_external: {
+    icon: "hub",
+    summary: "Use SC-build launchers from an external project with a vendored, shared-checkout, or cached Sane C++ layout."
+  },
+  page_building_contributor: {
+    icon: "engineering",
+    summary: "Build the repository locally, run focused tests, reproduce issues, and validate contribution branches."
+  },
+  page_building_user: {
+    icon: "add_box",
+    summary: "Add the libraries to an existing project without adopting the repository test suite or project-generation workflow."
+  },
+  page_coding_style: {
+    icon: "format_align_left",
+    summary: "Formatting, naming, error-handling, and API rules for code that should remain readable to humans and agents."
+  },
+  page_examples: {
+    icon: "terminal",
+    summary: "Run the example programs and use them as practical references for SC::Build, Async, Http, Plugin, and other libraries."
+  },
+  page_faq: {
+    icon: "help",
+    summary: "Answers for standard-library mode, exceptions, RTTI, STL integration, debug visualizers, and compatibility questions."
+  },
+  libraries: {
+    icon: "table_rows",
+    summary: "Browse the generated library list, dependency graph, LOC summary, and C binding groups.",
+    fallback:
+      "The library catalog is now presented as a dedicated website section with cards, maturity badges, dependencies, downloads, and reference links.\n\nOpen the [Library catalog](/SaneCppLibraries/libraries/) for the current list."
+  },
+  page_platforms: {
+    icon: "devices",
+    summary: "Supported, planned, and intentionally unsupported operating-system targets."
+  },
+  page_principles: {
+    icon: "rule",
+    summary: "The constraints behind the libraries: readable code, explicit ownership, fast builds, strict errors, and controlled dependencies.",
+    intro:
+      "These principles describe the shape of Sane C++ Libraries. They keep the code small, explicit, portable, and predictable enough for agents to modify without silently changing the project model."
+  },
+  page_single_file_libs: {
+    icon: "inventory_2",
+    summary: "Open the generated amalgamation tool for standalone single-file headers.",
+    fallback:
+      "The in-browser amalgamation tool is still served from the generated reference pages because it depends on the repository's bundled JavaScript tool.\n\nOpen the [legacy generated amalgamation tool](/SaneCppLibraries/reference/doxygen/page_single_file_libs.html) to pick a library and download its standalone header."
+  },
+  page_tests: {
+    icon: "fact_check",
+    summary: "Understand where tests live, how they double as examples, and how coverage is published."
+  },
+  page_tools: {
+    icon: "build",
+    summary: "Use self-contained C++ tools that compile on demand through the repository bootstrap scripts."
+  }
+};
 
 function readFiles(directory: string) {
   return fs
@@ -94,8 +167,12 @@ function firstMeaningfulLine(body: string) {
         !line.startsWith("@brief") &&
         !line.startsWith("# ")
       );
-    });
+	    });
   return lines[0] ?? "";
+}
+
+function guideMeta(pageId: string, slug: string) {
+  return guideMetadata[pageId] ?? guideMetadata[slug] ?? { summary: "", icon: "article" };
 }
 
 function normalizeSlug(value: string) {
@@ -114,7 +191,7 @@ function normalizeSlug(value: string) {
 
 function extractPageHeader(source: string) {
   const pageMatch = source.match(/^@page\s+(\S+)\s+(.+)$/m);
-  const briefMatch = source.match(/^@brief\s+(.+)$/m);
+  const briefMatch = source.match(/^@brief[^\S\r\n]+(.+)$/m);
   return {
     pageId: pageMatch?.[1] ?? "",
     title: pageMatch?.[2]?.trim() ?? "",
@@ -165,11 +242,13 @@ export function getGuides(): Guide[] {
       const raw = fs.readFileSync(file, "utf8");
       const header = extractPageHeader(raw);
       const slug = normalizeSlug(header.pageId || path.basename(file, ".md"));
-      const summary = cleanInlineText(header.brief || firstMeaningfulLine(raw));
+      const metadata = guideMeta(header.pageId, slug);
+      const summary = metadata.summary || cleanInlineText(header.brief || firstMeaningfulLine(raw));
       return {
         slug,
         title: header.title || path.basename(file, ".md"),
         summary,
+        icon: metadata.icon,
         pageId: header.pageId,
         oldPath: `${header.pageId}.html`,
         sourcePath: file
@@ -224,6 +303,51 @@ export function getSkills(): SkillCard[] {
   });
 }
 
+export function getSkillStructure(): SkillStructure | null {
+  const [skillFile] = readNestedSkillFiles(skillsDir);
+  if (!skillFile) return null;
+
+  const skillRoot = path.dirname(skillFile);
+  const referencesRoot = path.join(skillRoot, "references");
+  const referenceFiles = fs.existsSync(referencesRoot) ? readNestedMarkdownFiles(referencesRoot) : [];
+  const raw = fs.readFileSync(skillFile, "utf8");
+  const topicSection = raw.split("## Topic Guides")[1]?.split(/\n##\s+/)[0] ?? "";
+  const groupIcons: Record<string, string> = {
+    "Onboarding And Navigation": "travel_explore",
+    "Core Types And Data Structures": "category",
+    "I/O, Async, And Platforms": "sync_alt",
+    "Reflection, Serialization, And Plugins": "extension"
+  };
+  const groups: SkillStructure["groups"] = [];
+  let currentGroup: SkillStructure["groups"][number] | null = null;
+
+  for (const line of topicSection.split("\n")) {
+    const groupMatch = line.match(/^###\s+(.+)$/);
+    if (groupMatch) {
+      const title = groupMatch[1].trim();
+      currentGroup = {
+        title,
+        icon: groupIcons[title] ?? "topic",
+        items: []
+      };
+      groups.push(currentGroup);
+      continue;
+    }
+
+    const itemMatch = line.match(/^-\s+(.+?):\s+\[[^\]]+\]\([^)]+\)/);
+    if (itemMatch && currentGroup) {
+      currentGroup.items.push(cleanInlineText(itemMatch[1]));
+    }
+  }
+
+  return {
+    rootRelative: path.relative(repoRoot, skillRoot).replaceAll(path.sep, "/"),
+    guideCount: referenceFiles.filter((file) => path.basename(file) === "guide.md").length,
+    referenceFileCount: referenceFiles.length,
+    groups
+  };
+}
+
 export function getBlogPosts(): BlogPost[] {
   return readFiles(blogDir)
     .map((file) => {
@@ -244,6 +368,17 @@ export function getBlogPosts(): BlogPost[] {
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
+function readNestedMarkdownFiles(directory: string): string[] {
+  return fs
+    .readdirSync(directory, { withFileTypes: true })
+    .flatMap((entry) => {
+      const fullPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) return readNestedMarkdownFiles(fullPath);
+      return entry.isFile() && entry.name.endsWith(".md") ? [fullPath] : [];
+    })
+    .sort((a, b) => a.localeCompare(b));
+}
+
 function cleanInlineText(text: string) {
   return text
     .replace(/^[🟥🟨🟩🟦]\s*/u, "")
@@ -253,6 +388,9 @@ function cleanInlineText(text: string) {
     .replace(/<br\s*\/?>/g, " ")
     .replace(/`/g, "")
     .replace(/^>\s+/gm, "")
+    .replace(/^[-*]\s+/, "")
+    .replace(/^#+\s+/, "")
+    .replace(/^\\[A-Za-z]+\s+.*$/, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -279,13 +417,16 @@ function preprocessMarkdown(
   currentKind: "guide" | "library"
 ) {
   let output = source;
+  output = output.replace(/^\\htmlonly[\s\S]*?^\\endhtmlonly\s*$/gm, "");
   output = output.replace(/^@page\s+.+$/gm, "");
-  output = output.replace(/^@brief\s+.+$/gm, "");
+  output = output.replace(/^@brief(?:[^\S\r\n].*)?$/gm, "");
   output = output.replace(/^\[TOC\]\s*$/gm, "");
   output = output.replace(/^\\htmlinclude.+$/gm, "");
   output = output.replace(/^@copy(details|brief|doc)\s+.+$/gm, "");
+  output = output.replace(/@copy(?:details|brief|doc)\s+([A-Za-z0-9_:]+)/g, "$1");
   output = output.replace(/^\\snippet.+$/gm, "");
-  output = output.replace(/^@note\s*(.*)$/gm, (_match, note) => `> Note: ${note.trim()}`);
+  output = output.replace(/^@note[^\S\r\n]+(.+)$/gm, (_match, note) => `> Note: ${note.trim()}`);
+  output = output.replace(/^@note[^\S\r\n]*$/gm, "> Note:");
   output = output.replace(/^([🟥🟨🟩🟦])\s+(.+)$/gmu, (_match, _emoji, label) => label.trim());
   output = output.replace(/!\[Dependency Graph\]\(([^)]+)\)/g, (_match, assetPath) => {
     return `![Dependency Graph](${withSiteBase(`/reference/doxygen/${assetPath}`)})`;
@@ -307,6 +448,40 @@ function preprocessMarkdown(
   return output.trim();
 }
 
+function normalizeComparableText(text: string) {
+  return cleanInlineText(text).toLowerCase();
+}
+
+function removeLeadingTitle(markdown: string, title: string) {
+  const lines = markdown.trimStart().split("\n");
+  const firstLine = lines[0]?.trim() ?? "";
+  const match = firstLine.match(/^#\s+(.+)$/);
+  if (match && normalizeComparableText(match[1]) === normalizeComparableText(title)) {
+    return lines.slice(1).join("\n").trimStart();
+  }
+  return markdown;
+}
+
+function removeLeadingIntro(markdown: string, summary: string) {
+  const trimmed = markdown.trimStart();
+  if (
+    trimmed.startsWith("#") ||
+    trimmed.startsWith("-") ||
+    trimmed.startsWith("*") ||
+    trimmed.startsWith(">") ||
+    trimmed.startsWith("```")
+  ) {
+    return markdown;
+  }
+
+  const parts = trimmed.split(/\n\s*\n/);
+  const [firstBlock, ...rest] = parts;
+  if (firstBlock && rest.length > 0 && normalizeComparableText(firstBlock) === normalizeComparableText(summary)) {
+    return rest.join("\n\n").trimStart();
+  }
+  return markdown;
+}
+
 function getRouteMap() {
   const map = new Map<string, string>();
   for (const guide of getGuides()) {
@@ -322,6 +497,23 @@ function getRouteMap() {
 export function renderRepoMarkdown(sourcePath: string, kind: "guide" | "library") {
   const source = fs.readFileSync(sourcePath, "utf8");
   return marked.parse(preprocessMarkdown(source, getRouteMap(), kind));
+}
+
+export function renderGuideMarkdown(guide: Guide) {
+  const source = fs.readFileSync(guide.sourcePath, "utf8");
+  let markdown = preprocessMarkdown(source, getRouteMap(), "guide");
+  markdown = removeLeadingTitle(markdown, guide.title);
+  markdown = removeLeadingIntro(markdown, guide.summary);
+
+  const metadata = guideMeta(guide.pageId, guide.slug);
+  if (metadata.intro) {
+    markdown = `${metadata.intro}\n\n${markdown}`.trim();
+  }
+  if (metadata.fallback && (markdown.trim() === "" || guide.pageId === "libraries")) {
+    markdown = metadata.fallback;
+  }
+
+  return marked.parse(markdown);
 }
 
 export function getHomeMetrics() {

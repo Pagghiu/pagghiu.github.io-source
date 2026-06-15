@@ -48,6 +48,9 @@ html[data-theme="light"] {
   --text: #111827;
   --muted: #5a6678;
   --muted-strong: #273449;
+  --accent-cool: #007f67;
+  --accent-strong: #006cba;
+  --success: #007f67;
   --hero-highlight: #006b76;
   --eyebrow: #006b76;
   --link: #135bc7;

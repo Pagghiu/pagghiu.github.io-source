@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { getGuides, renderRepoMarkdown } from "../../../lib/site-data";
+import { getGuides, renderGuideMarkdown } from "../../../lib/site-data";
 import { withBase } from "../../../lib/base";
 
 export function getStaticPaths() {
@@ -8,7 +8,7 @@ export function getStaticPaths() {
 }
 
 const { guide } = Astro.props;
-const html = await renderRepoMarkdown(guide.sourcePath, "guide");
+const html = await renderGuideMarkdown(guide);
 ---
 
 <BaseLayout title={`${guide.title} | Sane C++ Libraries`} description={guide.summary}>
@@ -41,10 +41,14 @@ const html = await renderRepoMarkdown(guide.sourcePath, "guide");
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
     gap: 1.25rem;
+    min-width: 0;
   }
 
   .article {
+    min-width: 0;
+    max-width: 100%;
     padding: 1.5rem;
+    overflow: hidden;
   }
 
   .sidebar {
