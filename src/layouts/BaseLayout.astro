@@ -54,7 +54,10 @@ const nav = [
           <LogoMark size={46} />
           <span>
             <strong>Sane C++ Libraries</strong>
-            <small>Platform Abstraction C++ Libraries for Agents</small>
+            <small>
+              <span>Platform Abstraction C++ Libraries</span>
+              <span>for Agents</span>
+            </small>
           </span>
         </a>
         <div class="nav-cluster" data-nav-cluster>
@@ -121,11 +124,15 @@ const nav = [
     border-bottom: 1px solid var(--header-border);
   }
 
+  .site-header .shell {
+    width: min(calc(100% - 2rem), 1880px);
+  }
+
   .header-row {
     min-height: var(--nav-height);
     display: grid;
     gap: 1rem;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
   }
 
@@ -133,6 +140,11 @@ const nav = [
     display: flex;
     align-items: center;
     gap: 0.9rem;
+    min-width: 0;
+  }
+
+  .brand > span {
+    min-width: 0;
   }
 
   .brand strong {
@@ -145,21 +157,21 @@ const nav = [
     display: block;
     color: var(--muted);
     font-size: 0.79rem;
-    max-width: 15rem;
     line-height: 1.25;
   }
 
+  .brand small span {
+    display: block;
+    white-space: nowrap;
+  }
+
   .nav-cluster {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-    gap: 1.2rem;
-    min-width: 0;
+    display: contents;
   }
 
   .desktop-nav {
     display: flex;
-    justify-content: center;
+    justify-content: end;
     align-items: center;
     gap: 0.72rem;
     flex-wrap: nowrap;
@@ -220,13 +232,7 @@ const nav = [
     color: var(--muted-strong);
   }
 
-  @media (max-width: 1460px) {
-    .brand small {
-      display: none;
-    }
-  }
-
-  @media (max-width: 1280px) {
+  @media (max-width: 1180px) {
     .header-row {
       grid-template-columns: 1fr auto;
       min-height: 68px;

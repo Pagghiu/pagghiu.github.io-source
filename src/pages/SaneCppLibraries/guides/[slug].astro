@@ -59,7 +59,12 @@ const html = await renderRepoMarkdown(guide.sourcePath, "guide");
   }
 
   .sidebar a {
-    color: #ffd8a8;
+    color: var(--link);
+    font-weight: 700;
+  }
+
+  .sidebar a:hover {
+    color: var(--link-hover);
   }
 
   @media (max-width: 960px) {
@@ -68,4 +73,3 @@ const html = await renderRepoMarkdown(guide.sourcePath, "guide");
     }
   }
 </style>
-
