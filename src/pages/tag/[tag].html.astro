@@ -1,6 +1,8 @@
 ---
 import BlogLayout from "../../layouts/BlogLayout.astro";
-import { getAllTags, getPostsForTag } from "../../lib/blog-data";
+import { getAllTags, getBlogPosts, getPostsForTag } from "../../lib/blog-data";
+
+const allPosts = getBlogPosts();
 
 export function getStaticPaths() {
   return getAllTags().map((tag) => ({
@@ -12,8 +14,8 @@ export function getStaticPaths() {
 const { tag, posts } = Astro.props;
 ---
 
-<BlogLayout title={`${tag.label} - Sane Coding Blog`} description={`Posts tagged ${tag.label}`}>
-  <section class="shell tag-page">
+<BlogLayout title={`${tag.label} - Sane Coding Blog`} description={`Posts tagged ${tag.label}`} posts={allPosts}>
+  <section class="tag-page">
     <a class="back-link" href="/">Blog</a>
     <h1>{tag.label}</h1>
     <div class="post-list">
@@ -32,7 +34,7 @@ const { tag, posts } = Astro.props;
 
 <style>
   .tag-page {
-    padding-top: 3rem;
+    padding-top: 0.4rem;
   }
 
   .back-link {

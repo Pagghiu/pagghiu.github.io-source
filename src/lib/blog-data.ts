@@ -22,7 +22,13 @@ export type BlogPost = {
   image: string | null;
   sourcePath: string;
   html: string;
+  toc: TocEntry[];
   url: string;
+};
+
+export type TocEntry = {
+  href: string;
+  label: string;
 };
 
 function readBlogFiles() {
@@ -37,6 +43,7 @@ function parsePelicanArticle(source: string) {
   const lines = source.split("\n");
   const data: Record<string, string> = {};
   let index = 0;
+  let activeKey: string | null = null;
   for (; index < lines.length; index += 1) {
     const line = lines[index];
     if (line.trim() === "") {
@@ -45,8 +52,15 @@ function parsePelicanArticle(source: string) {
     }
 
     const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$/);
-    if (!match) break;
+    if (!match) {
+      if (activeKey && /^\s+/.test(line)) {
+        data[activeKey] = `${data[activeKey]}\n${line.trim()}`;
+        continue;
+      }
+      break;
+    }
     data[match[1]] = match[2];
+    activeKey = match[1];
   }
 
   return {
@@ -80,6 +94,40 @@ function normalizeContent(markdown: string) {
     .replace(/https:\/\/pagghiu\.github\.io\/SaneCppLibraries\/libraries\.html/g, "/SaneCppLibraries/libraries/");
 }
 
+function parseToc(value: string | undefined): TocEntry[] {
+  if (!value) return [];
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/^(#[^,]+),\s*(.+)$/);
+      return match ? { href: match[1], label: match[2].trim() } : null;
+    })
+    .filter((entry): entry is TocEntry => Boolean(entry));
+}
+
+function slugifyHeading(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function addHeadingIds(html: string) {
+  const seen = new Map<string, number>();
+  return html.replace(/<h([1-6])>(.*?)<\/h\1>/g, (_match, level: string, contents: string) => {
+    const base = slugifyHeading(contents);
+    if (!base) return `<h${level}>${contents}</h${level}>`;
+    const count = seen.get(base) ?? 0;
+    seen.set(base, count + 1);
+    const id = count === 0 ? base : `${base}-${count + 1}`;
+    return `<h${level} id="${id}">${contents}</h${level}>`;
+  });
+}
+
 export function getBlogPosts(): BlogPost[] {
   return readBlogFiles()
     .map((file) => {
@@ -97,6 +145,7 @@ export function getBlogPosts(): BlogPost[] {
       ];
       const image = parsed.data.Image ? `/images/${String(parsed.data.Image)}` : null;
       const content = normalizeContent(parsed.content);
+      const toc = parseToc(parsed.data.TOC);
       return {
         slug,
         legacySlug,
@@ -107,7 +156,8 @@ export function getBlogPosts(): BlogPost[] {
         summary: cleanSummary(String(parsed.data.Summary ?? "")),
         image,
         sourcePath: file,
-        html: marked.parse(content) as string,
+        html: addHeadingIds(marked.parse(content) as string),
+        toc,
         url: `${siteUrl}/${legacySlug}.html`
       };
     })

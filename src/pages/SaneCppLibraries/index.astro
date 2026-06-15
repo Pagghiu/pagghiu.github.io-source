@@ -201,7 +201,7 @@ Validation: run the focused HttpClient tests in Debug`;
 
   .hero-grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
     gap: 2rem;
     align-items: center;
   }
@@ -260,6 +260,10 @@ Validation: run the focused HttpClient tests in Debug`;
     position: relative;
     margin: 0;
     min-width: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #08111e;
+    box-shadow: 0 26px 90px rgba(0, 0, 0, 0.42);
   }
 
   .hero-visual::before {
@@ -273,11 +277,11 @@ Validation: run the focused HttpClient tests in Debug`;
   }
 
   .hero-visual img {
-    width: min(920px, 68vw);
-    max-width: none;
-    margin-left: -2rem;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
     border-radius: 8px;
-    box-shadow: 0 26px 90px rgba(0, 0, 0, 0.42);
   }
 
   .hero-library-panel {

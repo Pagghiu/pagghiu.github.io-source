@@ -3,197 +3,141 @@ import BlogLayout from "../layouts/BlogLayout.astro";
 import { getBlogPosts } from "../lib/blog-data";
 
 const posts = getBlogPosts();
-const featured = posts[0];
 ---
 
-<BlogLayout title="Sane Coding Blog" description="Sane Coding Blog by Stefano Cristiano">
-  <section class="shell blog-hero">
-    <div>
-      <h1>Sane Coding Blog</h1>
-      <p>
-        Release notes, design notes, and practical updates around Sane C++ Libraries.
-      </p>
-    </div>
+<BlogLayout title="Sane Coding Blog" description="Sane Coding Blog by Stefano Cristiano" posts={posts}>
+  <section class="blog-intro">
+    <h1>Sane Coding Blog</h1>
+    <p>
+      Release notes, design notes, and practical updates around Sane C++ Libraries.
+    </p>
     <a class="button primary" href="/SaneCppLibraries/">Open Sane C++ Libraries</a>
   </section>
 
-  {featured && (
-    <section class="shell featured-post">
-      <a class="featured-card" href={`/site/blog/${featured.slug}.html`}>
-        {featured.image && (
-          <span class="featured-media">
-            <img src={featured.image} alt="" loading="eager" />
-          </span>
-        )}
-        <div>
-          <time datetime={featured.date}>{featured.date}</time>
-          <h2>{featured.title}</h2>
-          <p>{featured.summary}</p>
-        </div>
-      </a>
-    </section>
-  )}
-
-  <section class="shell post-list" aria-label="Blog posts">
+  <section class="post-feed" aria-label="Blog posts">
     {posts.map((post) => (
-      <article class="post-row">
+      <article class="blog-card">
+        <header>
+          <h2><a href={`/site/blog/${post.slug}.html`}>{post.title}</a></h2>
+          <time datetime={post.date}>{post.date}</time>
+        </header>
         {post.image && (
-          <a class="post-thumb" href={`/site/blog/${post.slug}.html`} aria-label={post.title}>
-            <img class="post-thumb-image" src={post.image} alt="" loading="lazy" />
+          <a class="blog-card-media" href={`/site/blog/${post.slug}.html`} aria-label={post.title}>
+            <img src={post.image} alt="" loading="lazy" />
           </a>
         )}
-        <div class="post-copy">
-          <time datetime={post.date}>{post.date}</time>
-          <h2><a href={`/site/blog/${post.slug}.html`}>{post.title}</a></h2>
-          <p>{post.summary}</p>
-        </div>
+        <p>{post.summary}</p>
+        <a class="continue-link" href={`/site/blog/${post.slug}.html`}>Continue...</a>
       </article>
     ))}
   </section>
 </BlogLayout>
 
 <style>
-  .blog-hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    gap: 2rem;
-    padding: 3rem 0 1.8rem;
+  .blog-intro {
+    margin-bottom: 1.5rem;
+    padding: 0.4rem 0 1.4rem;
   }
 
-  .blog-hero h1 {
-    margin: 0 0 0.8rem;
-    font-size: clamp(2.7rem, 6vw, 4.9rem);
+  .blog-intro h1 {
+    margin: 0 0 0.6rem;
+    font-size: clamp(2.4rem, 6vw, 3.7rem);
     line-height: 1;
   }
 
-  .blog-hero p {
-    margin: 0;
-    max-width: 42rem;
+  .blog-intro p {
+    margin: 0 0 1.25rem;
+    max-width: 40rem;
     color: var(--muted);
-    font-size: 1.16rem;
+    font-size: 1.05rem;
     line-height: 1.65;
   }
 
-  .featured-post {
-    margin-top: 1rem;
+  .post-feed {
+    display: grid;
+    gap: 2rem;
+    min-width: 0;
   }
 
-  .featured-card {
-    display: grid;
-    grid-template-columns: minmax(18rem, 0.95fr) minmax(0, 1.05fr);
-    gap: 1.4rem;
-    align-items: center;
-    padding: 1rem;
-    border: 1px solid var(--border);
+  .blog-card {
+    min-width: 0;
+    padding: clamp(1.25rem, 3vw, 2.1rem);
     border-radius: 8px;
-    background: var(--bg-card);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-card) 96%, white 2%);
     box-shadow: var(--shadow);
   }
 
-  .featured-media {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 16rem;
-    overflow: hidden;
-    border-radius: 8px;
-    background: var(--surface-strong);
+  .blog-card header {
+    margin-bottom: 1.05rem;
   }
 
-  .featured-media img {
-    width: 100%;
-    height: auto;
-    max-height: 28rem;
-    object-fit: contain;
-  }
-
-  time {
-    color: var(--muted);
-    font-size: 0.86rem;
-    font-weight: 750;
-  }
-
-  .featured-card h2,
-  .post-row h2 {
-    margin: 0.35rem 0 0.55rem;
+  .blog-card h2 {
+    margin: 0 0 0.55rem;
     color: var(--text);
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.04;
+    overflow-wrap: anywhere;
   }
 
-  .featured-card h2 {
-    font-size: clamp(1.75rem, 3vw, 2.75rem);
-    line-height: 1.08;
+  .blog-card time {
+    color: color-mix(in srgb, var(--accent-cool) 70%, var(--muted));
+    font-size: 0.82rem;
+    font-weight: 850;
+    text-transform: uppercase;
   }
 
-  .featured-card p,
-  .post-row p {
-    margin: 0;
-    color: var(--muted);
-    line-height: 1.65;
-  }
-
-  .post-list {
-    display: grid;
-    margin-top: 2.5rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .post-row {
-    display: grid;
-    grid-template-columns: clamp(18rem, 34vw, 30rem) minmax(0, 1fr);
-    align-items: center;
-    gap: 1.4rem;
-    padding: 1.1rem 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .post-thumb {
+  .blog-card-media {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 11rem;
-    aspect-ratio: 2.2 / 1;
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 2.45 / 1;
+    margin: 0.6rem 0 1.25rem;
     overflow: hidden;
     border-radius: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     background: var(--surface-strong);
   }
 
-  .post-thumb-image {
+  .blog-card-media img {
     width: 100%;
-    height: auto;
-    max-height: 100%;
+    height: 100%;
     object-fit: contain;
   }
 
-  .post-row h2 {
-    font-size: 1.35rem;
+  .blog-card p {
+    margin: 0;
+    color: var(--muted-strong);
+    font-size: 1.05rem;
+    line-height: 1.75;
   }
 
-  @media (max-width: 780px) {
-    .blog-hero,
-    .featured-card,
-    .post-row {
-      grid-template-columns: 1fr;
+  .continue-link {
+    display: inline-flex;
+    margin-top: 1.25rem;
+    color: var(--link);
+    font-weight: 750;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  @media (max-width: 720px) {
+    .blog-intro {
+      padding-top: 0;
     }
 
-    .blog-hero {
-      align-items: start;
-      flex-direction: column;
-      padding-top: 2.5rem;
+    .blog-card {
+      padding: 1rem;
     }
 
-    .featured-card {
-      grid-template-columns: 1fr;
+    .blog-card h2 {
+      font-size: clamp(1.55rem, 8vw, 2.2rem);
     }
 
-    .featured-media {
-      min-height: 0;
-    }
-
-    .post-thumb {
-      min-height: 0;
+    .blog-card-media {
+      aspect-ratio: 2.45 / 1;
     }
   }
 </style>

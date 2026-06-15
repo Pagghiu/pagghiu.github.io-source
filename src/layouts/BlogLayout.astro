@@ -1,14 +1,20 @@
 ---
 import "../styles/global.css";
 import ThemeToggle from "../components/ThemeToggle.astro";
+import type { BlogPost, TocEntry } from "../lib/blog-data";
 
 interface Props {
   title: string;
   description?: string;
+  posts?: BlogPost[];
+  activeSlug?: string;
+  toc?: TocEntry[];
 }
 
-const { title, description = "Sane Coding Blog" } = Astro.props;
+const { title, description = "Sane Coding Blog", posts = [], activeSlug, toc = [] } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const hasBlogSidebar = posts.length > 0;
+const hasToc = toc.length > 0;
 ---
 
 <!doctype html>
@@ -41,6 +47,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <header class="blog-header">
       <div class="shell blog-nav">
         <a class="blog-brand" href="/">
+          <img src="/images/favicon.png" alt="" width="46" height="46" />
           <strong>Sane Coding Blog</strong>
           <span>Notes on Sane C++ Libraries and practical systems work.</span>
         </a>
@@ -54,8 +61,36 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         </div>
       </div>
     </header>
-    <main>
-      <slot />
+    <main class:list={["blog-main", { "has-blog-sidebar": hasBlogSidebar, "has-toc": hasToc }]}>
+      <div class="blog-frame">
+        {hasBlogSidebar && (
+          <aside class="blog-sidebar" aria-label="Blog navigation">
+            <nav>
+              <strong>Projects</strong>
+              <a class="sidebar-link project-link" href="/SaneCppLibraries/">Sane C++ Libraries</a>
+              <strong>Blog</strong>
+              {posts.map((post) => (
+                <a class:list={["sidebar-link", { active: post.slug === activeSlug }]} href={`/site/blog/${post.slug}.html`}>
+                  {post.title}
+                </a>
+              ))}
+            </nav>
+          </aside>
+        )}
+        <div class="blog-content">
+          <slot />
+        </div>
+        {hasToc && (
+          <aside class="blog-toc" aria-label="Article sections">
+            <strong>Content</strong>
+            <nav>
+              {toc.map((entry) => (
+                <a href={entry.href}>{entry.label}</a>
+              ))}
+            </nav>
+          </aside>
+        )}
+      </div>
     </main>
     <footer class="blog-footer">
       <div class="shell">
@@ -70,6 +105,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   :global(.blog-body) {
     color: var(--text);
     background: var(--bg);
+    overflow-x: clip;
   }
 
   :global(.blog-body)::before {
@@ -86,11 +122,23 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   }
 
   .blog-nav {
-    min-height: 76px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1.4rem;
+  }
+
+  .blog-brand {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.9rem;
+  }
+
+  .blog-brand img {
+    grid-row: 1 / span 2;
+    border-radius: 0;
   }
 
   .blog-brand strong,
@@ -106,6 +154,79 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     color: var(--muted);
     font-size: 0.9rem;
     margin-top: 0.12rem;
+  }
+
+  .blog-main {
+    padding-top: 2rem;
+  }
+
+  .blog-frame {
+    width: min(calc(100% - 2rem), 1440px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(13rem, 16rem) minmax(0, 820px);
+    justify-content: center;
+    gap: 2.2rem;
+  }
+
+  .blog-main.has-toc .blog-frame {
+    grid-template-columns: minmax(13rem, 16rem) minmax(0, 820px) minmax(12rem, 15rem);
+  }
+
+  .blog-main:not(.has-blog-sidebar) .blog-frame {
+    grid-template-columns: minmax(0, 900px);
+  }
+
+  .blog-content {
+    min-width: 0;
+  }
+
+  .blog-sidebar,
+  .blog-toc {
+    position: sticky;
+    top: calc(64px + 2rem);
+    align-self: start;
+    max-height: calc(100vh - 6rem);
+    overflow: auto;
+    color: var(--muted);
+  }
+
+  .blog-sidebar nav,
+  .blog-toc nav {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .blog-sidebar strong,
+  .blog-toc strong {
+    display: block;
+    margin: 0 0 0.65rem;
+    color: var(--muted-strong);
+    font-size: 0.9rem;
+  }
+
+  .blog-sidebar strong:not(:first-child) {
+    margin-top: 1.6rem;
+  }
+
+  .sidebar-link,
+  .blog-toc a {
+    border-left: 2px solid transparent;
+    padding: 0.36rem 0 0.36rem 0.9rem;
+    color: var(--muted);
+    line-height: 1.35;
+    font-weight: 650;
+  }
+
+  .sidebar-link:hover,
+  .sidebar-link.active,
+  .blog-toc a:hover {
+    border-left-color: var(--link);
+    color: var(--link);
+  }
+
+  .project-link {
+    margin-bottom: 0.35rem;
   }
 
   .blog-actions,
@@ -138,6 +259,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   }
 
   @media (max-width: 720px) {
+    .blog-main {
+      padding-top: 1.4rem;
+    }
+
+    .blog-frame,
+    .blog-main.has-toc .blog-frame {
+      grid-template-columns: 1fr;
+    }
+
+    .blog-sidebar,
+    .blog-toc {
+      display: none;
+    }
+
     .blog-nav,
     .blog-actions,
     .blog-footer .shell {
@@ -147,6 +282,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
     .blog-nav nav {
       flex-wrap: wrap;
+    }
+
+    .blog-brand {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .blog-brand img {
+      display: none;
     }
   }
 </style>
