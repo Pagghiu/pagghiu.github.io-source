@@ -12,7 +12,7 @@ const featuredLibraries = getFeaturedLibraries();
 const [skill] = getSkills();
 const heroLibraries = libraries.map((library) => ({ slug: library.slug, title: library.title }));
 
-const constraints = ["Agent-first", "Ready-to-use skills", "Use what you need", "No hidden allocations", "Not a framework"];
+const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to integrate", "✅ Bloat-free", "⛔️ No external dependencies", "⛔️ No hidden allocations", "⛔️ Not a framework"];
 const agentBrief = `Title: HttpClient: Add a request timeout option
 Objective: fail requests that take too long
 Context: fit the existing streaming-first design
@@ -29,7 +29,7 @@ Validation: run the focused HttpClient tests in Debug`;
       <div class="hero-copy">
         <h1>Sane C++ Libraries</h1>
         <p class="hero-lede">
-          Cross-platform C++ libraries built for agents.
+          Cross-platform C++ libraries for coding agents.
         </p>
         <div class="constraint-rail" aria-label="Core constraints">
           {constraints.map((constraint) => <span>{constraint}</span>)}
@@ -78,11 +78,13 @@ Validation: run the focused HttpClient tests in Debug`;
 
   <section class="shell dependency-map-section panel">
     <div class="dependency-map-copy">
-      <div class="eyebrow">Dependency map</div>
-      <h2>Library graph</h2>
+      <div class="eyebrow">Philosophy</div>
+      <h2>The Sane way</h2>
       <p>
-        Most libraries have no library-level dependency. A few higher-level libraries build on those small
-        pillars, so you can pick one useful piece without switching your whole project to Sane C++.
+        Sane C++ Libraries are built to be compact, efficient, inspectable, and careful about side effects.
+        The design consistently encourages explicit resource ownership and error handling across the API surface.
+        Coding agents can use the included skills to find the right constraints quickly and build useful software
+        without guessing.
       </p>
     </div>
     <div class="dependency-map-frame">
@@ -93,9 +95,9 @@ Validation: run the focused HttpClient tests in Debug`;
   <section class="shell section operating-model">
     <div class="section-heading">
       <div class="eyebrow">The reasons</div>
-      <h2>Why this shape?</h2>
+      <h2>Why should you care?</h2>
       <p>
-        Sane C++ Libraries tries to blend the compactness of single-file libraries with the convenience of a
+        Sane C++ Libraries blends the compactness of single-file libraries with the convenience of a
         small runtime. You can start with one library, a unity-build checkout, or the full SC::Build workflow
         without turning your project into a framework.
       </p>
