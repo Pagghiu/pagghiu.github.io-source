@@ -60,17 +60,34 @@ const remainingLibraries = libraries.filter((library) => !groupedSlugs.has(libra
     <div class="library-hero-copy">
       <h1>Libraries</h1>
       <p>
-        Use this catalog to choose the smallest useful library boundary for your project or Prompt Request.
+        Use this catalog to choose the smallest useful library for your project.
       </p>
     </div>
+
     <div class="catalog-summary panel">
       <strong>{libraries.length}</strong>
       <span>libraries</span>
       <small>Each tile links to the library page and generated reference.</small>
     </div>
+
+    </div>
+
   </section>
 
   <section class="shell library-groups">
+      <section class="library-group panel">
+        <div class="group-heading">
+          <div>
+            <div class="eyebrow">at a glance</div>
+            <h2>Libraries Map</h2>
+              <small>Most libraries are self-contained and independent.
+              <br>A few higher level libraries like <strong>Async</strong>, <strong>Plugin</strong>, <strong>Await</strong> or <strong>Http</strong> depend on others to expose more advanced features.</small>
+          </div>
+        </div>
+        <div>
+          <img src="/images/dependencies/SaneCppLibrariesDependencies.svg" alt="Dependency map for Sane C++ Libraries" loading="lazy" />
+</div>
+      </section>
     {groupedLibraries.map((group) => (
       <section class="library-group panel">
         <div class="group-heading">
