@@ -49,19 +49,9 @@ Validation: run the focused HttpClient tests in Debug`;
       <figure class="hero-visual">
         <img src={withBase("/brand/agent-runtime-map.png")} alt="Library and platform map for Sane C++ Libraries" />
         <aside class="hero-library-panel" aria-label="Sane C++ Libraries">
-          <strong>Libraries</strong>
-          <ul>
-            {heroLibraries.map((library) => (
-              <li>
-                <a href={withBase(`/libraries/${library.slug}/`)}>{library.title}</a>
-              </li>
-            ))}
-          </ul>
+          <strong>Platform</strong>
+          <span>macOS, Windows and Linux (Intel / ARM)</span>
         </aside>
-        <figcaption>
-          <strong>Cross-platform</strong>
-          <span>Targets macOS, Windows, and Linux on x86_64 and ARM64.</span>
-        </figcaption>
       </figure>
     </div>
   </section>
@@ -304,7 +294,7 @@ Validation: run the focused HttpClient tests in Debug`;
     position: absolute;
     left: 0.8rem;
     top: 0.8rem;
-    width: min(23rem, 48%);
+    width: min(23rem, 38%);
     max-height: calc(100% - 1.6rem);
     overflow: hidden;
     padding: 0.95rem;
@@ -635,7 +625,7 @@ Validation: run the focused HttpClient tests in Debug`;
     }
 
     .hero-library-panel {
-      width: min(22rem, 48%);
+      width: min(14rem, 48%);
     }
 
     .metric-band {
