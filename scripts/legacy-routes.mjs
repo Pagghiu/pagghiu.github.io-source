@@ -9,6 +9,8 @@ export const legacyRedirects = {
   "library_file_system.html": "/SaneCppLibraries/libraries/file-system/",
   "library_file_system_iterator.html": "/SaneCppLibraries/libraries/file-system-iterator/",
   "library_file_system_watcher.html": "/SaneCppLibraries/libraries/file-system-watcher/",
+  "library_fibers.html": "/SaneCppLibraries/libraries/fibers/",
+  "library_fibers_async.html": "/SaneCppLibraries/libraries/fibers-async/",
   "library_foundation.html": "/SaneCppLibraries/libraries/foundation/",
   "library_hashing.html": "/SaneCppLibraries/libraries/hashing/",
   "library_http.html": "/SaneCppLibraries/libraries/http/",
