@@ -67,7 +67,7 @@ html[data-theme="light"] {
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -78,7 +78,7 @@ body {
     radial-gradient(circle at top right, color-mix(in srgb, var(--accent-cool) 18%, transparent), transparent 24%),
     linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 42%, var(--bg)) 0%, var(--bg) 34%, color-mix(in srgb, var(--accent) 4%, var(--bg)) 100%);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body::before {

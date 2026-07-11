@@ -44,7 +44,18 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
       <section class="meta-grid">
         <div class="card">
           <strong>Dependencies</strong>
-          <p>{library.dependencies.length ? library.dependencies.join(", ") : "No library-level dependencies"}</p>
+          {library.dependencies.length > 0 ? (
+            <p class="dependency-links">
+              {library.dependencies.map((dependencyTitle) => {
+                const dependency = libraries.find((item) => item.title === dependencyTitle);
+                return dependency
+                  ? <a href={withBase(`/libraries/${dependency.slug}/`)}>{dependencyTitle}</a>
+                  : <span>{dependencyTitle}</span>;
+              })}
+            </p>
+          ) : (
+            <p>No library-level dependencies</p>
+          )}
         </div>
         <div class="card">
           <strong>Single file</strong>
@@ -57,31 +68,25 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
       </section>
 
       <article class="panel prose article doxygen-content" set:html={html} />
+
+      {posts.length > 0 && (
+        <section class="panel related-posts" aria-labelledby="related-posts-heading">
+          <h2 id="related-posts-heading">Related blog posts</h2>
+          <div class="related-links">
+            {posts.map((post) => (
+              <a href={post.externalUrl} target="_blank" rel="noreferrer">{post.title}</a>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
 
     <aside class="context-rail" aria-label="Page context">
-      {generatedDocument && (
-        <div class="card generated-toc" aria-label="Page sections" set:html={generatedDocument.tocHtml} />
-      )}
-      {library.dependencyGraph && (
-        <div class="card">
-          <strong>Dependency graph</strong>
-          <img src={withBase(`/reference/doxygen/${library.dependencyGraph}`)} alt={`${library.title} dependency graph`} />
-        </div>
-      )}
-      <div class="card">
-        <strong>Keep exploring</strong>
-        <a href={withBase("/guides/building-user/")}>How to integrate the libraries</a>
-        <a href={withBase("/reference/")}>Generated reference and compatibility pages</a>
+      <div class="card context-panel">
+        {generatedDocument && (
+          <div class="generated-toc" aria-label="Page sections" set:html={generatedDocument.tocHtml} />
+        )}
       </div>
-      {posts.length > 0 && (
-        <div class="card">
-          <strong>Related blog posts</strong>
-          {posts.map((post) => (
-            <a href={post.externalUrl} target="_blank" rel="noreferrer">{post.title}</a>
-          ))}
-        </div>
-      )}
     </aside>
   </section>
 </BaseLayout>
@@ -112,6 +117,11 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
   .library-rail {
     padding: 1rem 0.8rem 1rem 0;
     border-right: 1px solid var(--border);
+    position: sticky;
+    top: calc(var(--nav-height) + 1rem);
+    max-height: calc(100vh - var(--nav-height) - 2rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
 
   .rail-heading {
@@ -176,10 +186,34 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     line-height: 1.65;
   }
 
+  .dependency-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.8rem;
+  }
+
+  .dependency-links a {
+    color: var(--link);
+    font-weight: 750;
+  }
+
+  .dependency-links a:hover {
+    color: var(--link-hover);
+  }
+
+  .meta-grid {
+    margin-bottom: 1rem;
+  }
+
+  .meta-grid .card {
+    border-radius: 6px;
+  }
+
   .article {
     min-width: 0;
     max-width: 100%;
     padding: 1.5rem;
+    border-radius: 8px;
     overflow: hidden;
   }
 
@@ -196,6 +230,36 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
 
   .context-rail .card:last-child {
     margin-bottom: 0;
+  }
+
+  .context-panel {
+    position: sticky;
+    top: calc(var(--nav-height) + 1rem);
+    max-height: calc(100vh - var(--nav-height) - 2rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .related-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1.25rem;
+  }
+
+  .related-posts {
+    margin-top: 1rem;
+    padding: 1.35rem;
+    border-radius: 8px;
+  }
+
+  .related-posts h2 {
+    margin: 0 0 1rem;
+    font-size: 1.35rem;
+  }
+
+  .related-posts a {
+    color: var(--link);
+    font-weight: 700;
   }
 
   .generated-toc :global(.toc) {
@@ -447,6 +511,12 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     }
 
     .generated-toc {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .context-panel {
       position: static;
       max-height: none;
       overflow: visible;
