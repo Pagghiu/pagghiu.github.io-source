@@ -31,6 +31,25 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
       </nav>
     </aside>
 
+    <details class="mobile-library-nav">
+      <summary>Libraries <span>{library.title}</span></summary>
+      <nav>
+        <a href={withBase("/libraries/")}>Library index</a>
+        {libraries.map((item) => (
+          <a class:list={{ active: item.slug === library.slug }} href={withBase(`/libraries/${item.slug}/`)} aria-current={item.slug === library.slug ? "page" : undefined}>
+            {item.title}
+          </a>
+        ))}
+      </nav>
+    </details>
+
+    {generatedDocument && (
+      <details class="mobile-context-nav">
+        <summary>On this page</summary>
+        <div class="generated-toc" aria-label="Page sections" set:html={generatedDocument.tocHtml} />
+      </details>
+    )}
+
     <div class="library-main">
       <section class="page-hero library-hero">
         <div class="library-heading">
@@ -122,6 +141,11 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     max-height: calc(100vh - var(--nav-height) - 2rem);
     overflow-y: auto;
     scrollbar-width: thin;
+  }
+
+  .mobile-library-nav,
+  .mobile-context-nav {
+    display: none;
   }
 
   .rail-heading {
@@ -323,6 +347,10 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     white-space: pre;
   }
 
+  .doxygen-content :global(.ttc) {
+    display: none;
+  }
+
   .doxygen-content :global(.fragment span.keyword) {
     color: #cc99cd;
   }
@@ -444,10 +472,10 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
   }
 
   .doxygen-content :global(table.markdownTable) {
-    width: 100%;
     margin: 1.5rem 0;
     border-collapse: collapse;
-    overflow: hidden;
+    overflow-x: auto;
+    table-layout: auto;
   }
 
   .doxygen-content :global(table.markdownTable td),
@@ -456,6 +484,14 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     border-bottom: 1px solid var(--border);
     text-align: left;
     vertical-align: top;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .doxygen-content :global(table.markdownTable th:first-child),
+  .doxygen-content :global(table.markdownTable td:first-child) {
+    min-width: max-content;
+    white-space: nowrap;
   }
 
   .doxygen-content :global(.memitem),
@@ -487,36 +523,98 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     }
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1100px) {
     .docs-layout {
       grid-template-columns: 1fr;
     }
 
     .library-rail,
     .context-rail {
-      position: static;
-      max-height: none;
-      overflow: visible;
+      display: none;
     }
 
-    .library-rail {
+    .mobile-library-nav,
+    .mobile-context-nav {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+    }
+
+    .mobile-library-nav {
       order: -2;
-      border-right: 0;
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 0;
     }
 
-    .context-rail {
+    .mobile-context-nav {
       order: -1;
     }
 
-    .generated-toc {
-      position: static;
-      max-height: none;
-      overflow: visible;
+    .mobile-library-nav > summary,
+    .mobile-context-nav > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 800;
+      list-style: none;
     }
 
-    .context-panel {
+    .mobile-library-nav > summary::-webkit-details-marker,
+    .mobile-context-nav > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .mobile-library-nav > summary::after,
+    .mobile-context-nav > summary::after {
+      content: "+";
+      color: var(--link);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .mobile-library-nav[open] > summary::after,
+    .mobile-context-nav[open] > summary::after {
+      content: "−";
+    }
+
+    .mobile-library-nav > summary span {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 650;
+    }
+
+    .mobile-library-nav nav {
+      display: grid;
+      gap: 0.15rem;
+      max-height: min(65vh, 32rem);
+      padding: 0.75rem;
+      overflow-y: auto;
+      border-top: 1px solid var(--border);
+    }
+
+    .mobile-library-nav nav a {
+      padding: 0.55rem 0.65rem;
+      border-left: 2px solid transparent;
+      color: var(--muted-strong);
+    }
+
+    .mobile-library-nav nav a.active {
+      border-left-color: var(--accent-strong);
+      color: var(--link);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      font-weight: 800;
+    }
+
+    .mobile-context-nav .generated-toc {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .generated-toc {
       position: static;
       max-height: none;
       overflow: visible;
