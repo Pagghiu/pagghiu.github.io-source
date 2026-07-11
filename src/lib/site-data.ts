@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import { decodeHTML } from "entities";
 import matter from "gray-matter";
 import { marked } from "marked";
+import { createHighlighter } from "shiki";
 
 const sourceRoot = process.cwd();
 const defaultSaneCppRepo = path.resolve(sourceRoot, "..", "SC-website");
@@ -13,6 +15,10 @@ const blogDir = path.join(sourceRoot, "content", "blog");
 const siteBase = "/SaneCppLibraries";
 const docsDir = path.join(repoRoot, "_Build", "_Documentation", "docs");
 const repoGitHubRoot = "https://github.com/Pagghiu/SaneCppLibraries/blob/main";
+const cppHighlighter = await createHighlighter({
+  themes: ["github-light", "catppuccin-mocha"],
+  langs: ["cpp"]
+});
 
 marked.setOptions({
   gfm: true,
@@ -531,6 +537,26 @@ function rewriteGeneratedDoxygenLinks(html: string, routeMap: Map<string, string
   });
 }
 
+function highlightDoxygenCppFragments(html: string) {
+  return html.replace(/<div class="fragment">([\s\S]*?)<\/div><!-- fragment -->/g, (_fragment, content) => {
+    const lines = Array.from(content.matchAll(/<div class="line">([\s\S]*?)<\/div>/g));
+    if (lines.length === 0) return _fragment;
+
+    const code = lines.map((line) => {
+      const withoutTags = line[1].replace(/<[^>]+>/g, "");
+      return decodeHTML(withoutTags);
+    }).join("\n");
+
+    return cppHighlighter.codeToHtml(code, {
+      lang: "cpp",
+      themes: {
+        light: "github-light",
+        dark: "catppuccin-mocha"
+      }
+    }).replace('<pre class="shiki ', '<pre class="fragment shiki ');
+  });
+}
+
 export function getGeneratedLibraryDocument(library: Library): GeneratedLibraryDocument | null {
   const generatedPath = path.join(docsDir, library.oldPath);
   if (!fs.existsSync(generatedPath)) return null;
@@ -545,7 +571,9 @@ export function getGeneratedLibraryDocument(library: Library): GeneratedLibraryD
   if (textBlockStart < 0) return null;
 
   const tocHtml = contents.slice(0, textBlockStart).replace(/^\s+|\s+$/g, "");
-  const contentHtml = rewriteGeneratedDoxygenLinks(contents.slice(textBlockStart).trim(), getRouteMap());
+  const contentHtml = highlightDoxygenCppFragments(
+    rewriteGeneratedDoxygenLinks(contents.slice(textBlockStart).trim(), getRouteMap())
+  );
   return { tocHtml, contentHtml };
 }
 

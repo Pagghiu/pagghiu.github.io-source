@@ -342,6 +342,23 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     white-space: normal;
   }
 
+  html[data-theme="dark"] .doxygen-content :global(.shiki),
+  html[data-theme="dark"] .doxygen-content :global(.shiki span) {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+
+  .doxygen-content :global(.shiki code) {
+    display: block;
+    min-width: max-content;
+    white-space: pre;
+  }
+
+  .doxygen-content :global(.shiki .line) {
+    display: inline;
+    white-space: pre;
+  }
+
   .doxygen-content :global(.line) {
     min-height: 1.65em;
     white-space: pre;
