@@ -1,0 +1,165 @@
+---
+import { getGuides, getLibraries } from "../lib/site-data";
+import { withBase } from "../lib/base";
+
+const libraries = getLibraries();
+const guides = getGuides();
+const pathname = Astro.url.pathname;
+const isGuide = pathname.includes("/guides/");
+const isLibrary = pathname.includes("/libraries/");
+const isHome = pathname === withBase("/");
+const librariesOpen = isLibrary || isHome || !isGuide;
+const guidesOpen = isGuide;
+
+const isActive = (href: string) => pathname === withBase(href);
+---
+
+<aside class="docs-sidebar" aria-label="Sane C++ documentation">
+  <details open={librariesOpen} data-default-open={librariesOpen ? "true" : "false"}>
+    <summary>
+      <span>Libraries</span>
+      <span class="count">{libraries.length}</span>
+    </summary>
+    <nav aria-label="Libraries">
+      <a class:list={{ active: pathname === withBase("/libraries/") }} href={withBase("/libraries/")}>Library index</a>
+      {libraries.map((library) => (
+        <a class:list={{ active: isActive(`/libraries/${library.slug}/`) }} href={withBase(`/libraries/${library.slug}/`)} aria-current={isActive(`/libraries/${library.slug}/`) ? "page" : undefined}>
+          {library.title}
+        </a>
+      ))}
+    </nav>
+  </details>
+
+  <details open={guidesOpen} data-default-open={guidesOpen ? "true" : "false"}>
+    <summary>
+      <span>Guides</span>
+      <span class="count">{guides.length}</span>
+    </summary>
+    <nav aria-label="Guides">
+      <a class:list={{ active: pathname === withBase("/guides/") }} href={withBase("/guides/")}>Guide index</a>
+      {guides.map((guide) => (
+        <a class:list={{ active: isActive(`/guides/${guide.slug}/`) }} href={withBase(`/guides/${guide.slug}/`)} aria-current={isActive(`/guides/${guide.slug}/`) ? "page" : undefined}>
+          {guide.title}
+        </a>
+      ))}
+    </nav>
+  </details>
+</aside>
+
+<script>
+  const media = window.matchMedia("(max-width: 1100px)");
+  const sections = document.querySelectorAll<HTMLDetailsElement>(".docs-sidebar details");
+  const applyDisclosureState = () => {
+    sections.forEach((section) => {
+      section.open = media.matches ? false : section.dataset.defaultOpen === "true";
+    });
+  };
+  applyDisclosureState();
+  media.addEventListener("change", applyDisclosureState);
+</script>
+
+<style>
+  .docs-sidebar {
+    position: sticky;
+    top: calc(var(--nav-height) + 1rem);
+    align-self: start;
+    max-height: calc(100vh - var(--nav-height) - 2rem);
+    padding-right: 0.85rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    scrollbar-width: thin;
+  }
+
+  details + details {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.84rem;
+    font-weight: 850;
+    letter-spacing: 0;
+    list-style: none;
+    text-transform: uppercase;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::before {
+    content: "chevron_right";
+    font-family: "Material Symbols Outlined";
+    color: var(--link);
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  details[open] > summary::before {
+    content: "expand_more";
+  }
+
+  .count {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  nav {
+    display: grid;
+    gap: 0.12rem;
+    padding-top: 0.2rem;
+  }
+
+  nav a {
+    display: block;
+    padding: 0.42rem 0.55rem 0.42rem 1.75rem;
+    border-left: 2px solid transparent;
+    color: var(--muted-strong);
+    font-size: 0.86rem;
+    line-height: 1.25;
+  }
+
+  nav a:hover {
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  nav a.active {
+    border-left-color: var(--accent-strong);
+    color: var(--link);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    font-weight: 800;
+  }
+
+  @media (max-width: 1100px) {
+    .docs-sidebar {
+      position: static;
+      max-height: none;
+      padding: 0.35rem;
+      overflow: visible;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+    }
+
+    details + details {
+      margin-top: 0.2rem;
+      padding-top: 0.2rem;
+    }
+
+    nav {
+      max-height: min(55vh, 28rem);
+      overflow-y: auto;
+    }
+  }
+</style>

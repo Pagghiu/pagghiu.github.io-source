@@ -17,32 +17,6 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
 
 <BaseLayout title={`${library.title} | Sane C++ Libraries`} description={library.summary}>
   <section class="docs-layout">
-    <aside class="library-rail" aria-label="Library navigation">
-      <div class="rail-heading">
-        <div class="eyebrow">Libraries</div>
-        <a href={withBase("/libraries/")}>Library index</a>
-      </div>
-      <nav>
-        {libraries.map((item) => (
-          <a class:list={{ active: item.slug === library.slug }} href={withBase(`/libraries/${item.slug}/`)} aria-current={item.slug === library.slug ? "page" : undefined}>
-            {item.title}
-          </a>
-        ))}
-      </nav>
-    </aside>
-
-    <details class="mobile-library-nav">
-      <summary>Libraries <span>{library.title}</span></summary>
-      <nav>
-        <a href={withBase("/libraries/")}>Library index</a>
-        {libraries.map((item) => (
-          <a class:list={{ active: item.slug === library.slug }} href={withBase(`/libraries/${item.slug}/`)} aria-current={item.slug === library.slug ? "page" : undefined}>
-            {item.title}
-          </a>
-        ))}
-      </nav>
-    </details>
-
     {generatedDocument && (
       <details class="mobile-context-nav">
         <summary>On this page</summary>
@@ -119,7 +93,7 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     width: min(calc(100% - 2rem), 1500px);
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(185px, 0.22fr) minmax(0, 1fr) minmax(245px, 0.28fr);
+    grid-template-columns: minmax(0, 1fr) minmax(245px, 0.28fr);
     gap: 1.25rem;
     align-items: start;
   }
@@ -128,64 +102,12 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     min-width: 0;
   }
 
-  .library-rail,
   .context-rail {
     align-self: start;
   }
 
-  .library-rail {
-    padding: 1rem 0.8rem 1rem 0;
-    border-right: 1px solid var(--border);
-    position: sticky;
-    top: calc(var(--nav-height) + 1rem);
-    max-height: calc(100vh - var(--nav-height) - 2rem);
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-
-  .mobile-library-nav,
   .mobile-context-nav {
     display: none;
-  }
-
-  .rail-heading {
-    display: grid;
-    gap: 0.45rem;
-    margin-bottom: 0.9rem;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .rail-heading a {
-    color: var(--muted-strong);
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .library-rail nav {
-    display: grid;
-    gap: 0.15rem;
-  }
-
-  .library-rail nav a {
-    display: block;
-    padding: 0.44rem 0.55rem;
-    border-left: 2px solid transparent;
-    color: var(--muted-strong);
-    font-size: 0.91rem;
-    line-height: 1.25;
-  }
-
-  .library-rail nav a:hover {
-    color: var(--text);
-    background: color-mix(in srgb, var(--accent) 8%, transparent);
-  }
-
-  .library-rail nav a.active {
-    border-left-color: var(--accent-strong);
-    color: var(--link);
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
-    font-weight: 800;
   }
 
   .library-heading {
@@ -536,7 +458,7 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
 
   @media (max-width: 1120px) {
     .docs-layout {
-      grid-template-columns: minmax(165px, 0.2fr) minmax(0, 1fr) minmax(220px, 0.28fr);
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 0.28fr);
     }
   }
 
@@ -545,12 +467,10 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
       grid-template-columns: 1fr;
     }
 
-    .library-rail,
     .context-rail {
       display: none;
     }
 
-    .mobile-library-nav,
     .mobile-context-nav {
       display: block;
       border: 1px solid var(--border);
@@ -558,15 +478,10 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
       background: var(--bg-card);
     }
 
-    .mobile-library-nav {
-      order: -2;
-    }
-
     .mobile-context-nav {
       order: -1;
     }
 
-    .mobile-library-nav > summary,
     .mobile-context-nav > summary {
       display: flex;
       align-items: center;
@@ -579,12 +494,10 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
       list-style: none;
     }
 
-    .mobile-library-nav > summary::-webkit-details-marker,
     .mobile-context-nav > summary::-webkit-details-marker {
       display: none;
     }
 
-    .mobile-library-nav > summary::after,
     .mobile-context-nav > summary::after {
       content: "+";
       color: var(--link);
@@ -592,38 +505,8 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
       line-height: 1;
     }
 
-    .mobile-library-nav[open] > summary::after,
     .mobile-context-nav[open] > summary::after {
       content: "−";
-    }
-
-    .mobile-library-nav > summary span {
-      margin-left: auto;
-      color: var(--muted);
-      font-size: 0.9rem;
-      font-weight: 650;
-    }
-
-    .mobile-library-nav nav {
-      display: grid;
-      gap: 0.15rem;
-      max-height: min(65vh, 32rem);
-      padding: 0.75rem;
-      overflow-y: auto;
-      border-top: 1px solid var(--border);
-    }
-
-    .mobile-library-nav nav a {
-      padding: 0.55rem 0.65rem;
-      border-left: 2px solid transparent;
-      color: var(--muted-strong);
-    }
-
-    .mobile-library-nav nav a.active {
-      border-left-color: var(--accent-strong);
-      color: var(--link);
-      background: color-mix(in srgb, var(--accent) 12%, transparent);
-      font-weight: 800;
     }
 
     .mobile-context-nav .generated-toc {

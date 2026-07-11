@@ -2,6 +2,7 @@
 import Search from "../components/Search.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import LogoMark from "../components/LogoMark.astro";
+import DocsSidebar from "../components/DocsSidebar.astro";
 import "../styles/global.css";
 import { withBase } from "../lib/base";
 
@@ -76,8 +77,13 @@ const nav = [
         </button>
       </div>
     </header>
-    <main>
-      <slot />
+    <main class="site-main">
+      <div class="site-main-shell">
+        <DocsSidebar />
+        <div class="site-content">
+          <slot />
+        </div>
+      </div>
     </main>
     <footer class="site-footer">
       <div class="shell footer-grid">
@@ -121,6 +127,19 @@ const nav = [
     backdrop-filter: blur(20px);
     background: var(--header-bg);
     border-bottom: 1px solid var(--header-border);
+  }
+
+  .site-main-shell {
+    width: min(calc(100% - 2rem), 1880px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(190px, 220px) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .site-content {
+    min-width: 0;
   }
 
   .site-header .shell {
@@ -266,6 +285,13 @@ const nav = [
     .header-actions {
       flex-wrap: wrap;
       align-items: stretch;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .site-main-shell {
+      grid-template-columns: 1fr;
+      padding-top: 0.75rem;
     }
   }
 
