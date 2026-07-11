@@ -1,46 +1,68 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import MaturityBadge from "../../../components/MaturityBadge.astro";
-import { getLibraries, renderRepoMarkdown, getBlogPosts } from "../../../lib/site-data";
+import { getLibraries, getGeneratedLibraryDocument, renderRepoMarkdown, getBlogPosts } from "../../../lib/site-data";
 import { withBase } from "../../../lib/base";
 
 export function getStaticPaths() {
   return getLibraries().map((library) => ({ params: { slug: library.slug }, props: { library } }));
 }
 
+const libraries = getLibraries();
 const { library } = Astro.props;
-const html = await renderRepoMarkdown(library.sourcePath, "library");
+const generatedDocument = getGeneratedLibraryDocument(library);
+const html = generatedDocument?.contentHtml ?? (await renderRepoMarkdown(library.sourcePath, "library"));
 const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post.slug));
 ---
 
 <BaseLayout title={`${library.title} | Sane C++ Libraries`} description={library.summary}>
-  <section class="shell page-hero library-hero">
-    <div class="library-heading">
-      <div class="eyebrow">Library</div>
-      <h1>{library.title}</h1>
-      <p>{library.summary}</p>
-      <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} variant="strong" />
-    </div>
-  </section>
+  <section class="docs-layout">
+    <aside class="library-rail" aria-label="Library navigation">
+      <div class="rail-heading">
+        <div class="eyebrow">Libraries</div>
+        <a href={withBase("/libraries/")}>Library index</a>
+      </div>
+      <nav>
+        {libraries.map((item) => (
+          <a class:list={{ active: item.slug === library.slug }} href={withBase(`/libraries/${item.slug}/`)} aria-current={item.slug === library.slug ? "page" : undefined}>
+            {item.title}
+          </a>
+        ))}
+      </nav>
+    </aside>
 
-  <section class="shell meta-grid">
-    <div class="card">
-      <strong>Dependencies</strong>
-      <p>{library.dependencies.length ? library.dependencies.join(", ") : "No library-level dependencies"}</p>
-    </div>
-    <div class="card">
-      <strong>Single file</strong>
-      <p>{library.singleFileDownload ? <a href={library.singleFileDownload}>Download release header</a> : "No single-file download link yet"}</p>
-    </div>
-    <div class="card">
-      <strong>Reference</strong>
-      <p><a href={withBase(`/reference/doxygen/${library.oldPath}`)}>Open generated API/docs</a></p>
-    </div>
-  </section>
+    <div class="library-main">
+      <section class="page-hero library-hero">
+        <div class="library-heading">
+          <div class="eyebrow">Library</div>
+          <h1>{library.title}</h1>
+          <p>{library.summary}</p>
+          <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} variant="strong" />
+        </div>
+      </section>
 
-  <section class="shell page-grid">
-    <article class="panel prose article" set:html={html} />
-    <aside class="sidebar">
+      <section class="meta-grid">
+        <div class="card">
+          <strong>Dependencies</strong>
+          <p>{library.dependencies.length ? library.dependencies.join(", ") : "No library-level dependencies"}</p>
+        </div>
+        <div class="card">
+          <strong>Single file</strong>
+          <p>{library.singleFileDownload ? <a href={library.singleFileDownload}>Download release header</a> : "No single-file download link yet"}</p>
+        </div>
+        <div class="card">
+          <strong>Reference</strong>
+          <p><a href={withBase(`/reference/doxygen/${library.oldPath}`)}>Open generated API/docs</a></p>
+        </div>
+      </section>
+
+      <article class="panel prose article doxygen-content" set:html={html} />
+    </div>
+
+    <aside class="context-rail" aria-label="Page context">
+      {generatedDocument && (
+        <div class="card generated-toc" aria-label="Page sections" set:html={generatedDocument.tocHtml} />
+      )}
       {library.dependencyGraph && (
         <div class="card">
           <strong>Dependency graph</strong>
@@ -69,6 +91,69 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     padding-top: 1rem;
   }
 
+  .docs-layout {
+    width: min(calc(100% - 2rem), 1500px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(185px, 0.22fr) minmax(0, 1fr) minmax(245px, 0.28fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .library-main {
+    min-width: 0;
+  }
+
+  .library-rail,
+  .context-rail {
+    align-self: start;
+  }
+
+  .library-rail {
+    padding: 1rem 0.8rem 1rem 0;
+    border-right: 1px solid var(--border);
+  }
+
+  .rail-heading {
+    display: grid;
+    gap: 0.45rem;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rail-heading a {
+    color: var(--muted-strong);
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+
+  .library-rail nav {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .library-rail nav a {
+    display: block;
+    padding: 0.44rem 0.55rem;
+    border-left: 2px solid transparent;
+    color: var(--muted-strong);
+    font-size: 0.91rem;
+    line-height: 1.25;
+  }
+
+  .library-rail nav a:hover {
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  .library-rail nav a.active {
+    border-left-color: var(--accent-strong);
+    color: var(--link);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    font-weight: 800;
+  }
+
   .library-heading {
     display: grid;
     gap: 1rem;
@@ -91,14 +176,6 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     line-height: 1.65;
   }
 
-  .page-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
-    gap: 1.25rem;
-    margin-top: 1.25rem;
-    min-width: 0;
-  }
-
   .article {
     min-width: 0;
     max-width: 100%;
@@ -106,29 +183,273 @@ const posts = getBlogPosts().filter((post) => library.relatedBlogs.includes(post
     overflow: hidden;
   }
 
-  .sidebar {
-    display: grid;
-    gap: 1rem;
-    align-self: start;
+  .context-rail {
+    display: block;
+    align-self: stretch;
   }
 
-  .sidebar .card {
+  .context-rail .card {
     display: grid;
     gap: 0.8rem;
+    margin-bottom: 1rem;
   }
 
-  .sidebar a {
-    color: var(--link);
+  .context-rail .card:last-child {
+    margin-bottom: 0;
   }
 
-  .sidebar a:hover {
+  .generated-toc :global(.toc) {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .generated-toc :global(.toc h3) {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  .generated-toc :global(.toc ul) {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .generated-toc :global(.toc ul ul) {
+    margin: 0.35rem 0 0 0.8rem;
+  }
+
+  .generated-toc :global(.toc li) {
+    margin: 0;
+    padding: 0;
+  }
+
+  .generated-toc :global(.toc a) {
+    color: var(--muted-strong);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .generated-toc :global(.toc a:hover) {
     color: var(--link-hover);
   }
 
-  @media (max-width: 960px) {
-    .library-hero,
-    .page-grid {
+  .doxygen-content {
+    min-width: 0;
+  }
+
+  .doxygen-content :global(.fragment) {
+    overflow-x: auto;
+    margin: 1.25rem 0;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--surface-strong) 82%, var(--bg));
+    color: var(--text);
+    font-family: "JetBrains Mono", "SFMono-Regular", monospace;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    white-space: normal;
+  }
+
+  .doxygen-content :global(.line) {
+    min-height: 1.65em;
+    white-space: pre;
+  }
+
+  .doxygen-content :global(.fragment span.keyword) {
+    color: #cc99cd;
+  }
+
+  .doxygen-content :global(.fragment span.keywordtype) {
+    color: #ab99cd;
+  }
+
+  .doxygen-content :global(.fragment span.keywordflow) {
+    color: #e08000;
+  }
+
+  .doxygen-content :global(.fragment span.stringliteral),
+  .doxygen-content :global(.fragment span.charliteral) {
+    color: #7ec699;
+  }
+
+  .doxygen-content :global(.fragment span.comment) {
+    color: #999999;
+    font-style: italic;
+  }
+
+  .doxygen-content :global(.fragment span.preprocessor) {
+    color: #65cabe;
+  }
+
+  .doxygen-content :global(.fragment a.code) {
+    color: #98c0e3;
+  }
+
+  .doxygen-content :global(.fragment a.code.hl_struct),
+  .doxygen-content :global(.fragment a.code.hl_class) {
+    color: #7dd3fc;
+  }
+
+  .doxygen-content :global(.fragment a.code.hl_function) {
+    color: #f6c177;
+  }
+
+  .doxygen-content :global(.fragment a.code.hl_variable) {
+    color: #82d3c8;
+  }
+
+  .doxygen-content :global(.fragment a.code.hl_define) {
+    color: #f78c6c;
+  }
+
+  .doxygen-content :global(.fragment a.code.hl_enumvalue) {
+    color: #c3e88d;
+  }
+
+  .doxygen-content :global(.fragment a.code.hl_typedef),
+  .doxygen-content :global(.fragment a.code.hl_namespace) {
+    color: #c792ea;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment) {
+    color: #37474f;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment span.keyword) {
+    color: #bb6bb2;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment span.keywordtype) {
+    color: #8258b3;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment span.keywordflow) {
+    color: #b35e18;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment span.stringliteral),
+  html[data-theme="light"] .doxygen-content :global(.fragment span.charliteral) {
+    color: #438a59;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment span.comment) {
+    color: #727272;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment span.preprocessor) {
+    color: #328f8b;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code) {
+    color: #3566b3;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_struct),
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_class) {
+    color: #087ea4;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_function) {
+    color: #a45a00;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_variable) {
+    color: #087d72;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_define) {
+    color: #b23c17;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_enumvalue) {
+    color: #467b16;
+  }
+
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_typedef),
+  html[data-theme="light"] .doxygen-content :global(.fragment a.code.hl_namespace) {
+    color: #7d3fa3;
+  }
+
+  .doxygen-content :global(.inline) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .doxygen-content :global(table.markdownTable) {
+    width: 100%;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
+    overflow: hidden;
+  }
+
+  .doxygen-content :global(table.markdownTable td),
+  .doxygen-content :global(table.markdownTable th) {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .doxygen-content :global(.memitem),
+  .doxygen-content :global(.memproto),
+  .doxygen-content :global(.memdoc) {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .doxygen-content :global(.anchor) {
+    scroll-margin-top: 6rem;
+  }
+
+  .generated-toc {
+    align-self: start;
+  }
+
+  .context-rail a {
+    color: var(--link);
+  }
+
+  .context-rail a:hover {
+    color: var(--link-hover);
+  }
+
+  @media (max-width: 1120px) {
+    .docs-layout {
+      grid-template-columns: minmax(165px, 0.2fr) minmax(0, 1fr) minmax(220px, 0.28fr);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .docs-layout {
       grid-template-columns: 1fr;
+    }
+
+    .library-rail,
+    .context-rail {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .library-rail {
+      order: -2;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    .context-rail {
+      order: -1;
+    }
+
+    .generated-toc {
+      position: static;
+      max-height: none;
+      overflow: visible;
     }
   }
 </style>

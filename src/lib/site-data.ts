@@ -45,6 +45,11 @@ export type Library = {
   maturityTone: "draft" | "mvp" | "usable" | "complete" | "unknown";
 };
 
+export type GeneratedLibraryDocument = {
+  tocHtml: string;
+  contentHtml: string;
+};
+
 export type BlogPost = {
   slug: string;
   title: string;
@@ -497,6 +502,51 @@ function getRouteMap() {
 export function renderRepoMarkdown(sourcePath: string, kind: "guide" | "library") {
   const source = fs.readFileSync(sourcePath, "utf8");
   return marked.parse(preprocessMarkdown(source, getRouteMap(), kind));
+}
+
+function rewriteGeneratedDoxygenLinks(html: string, routeMap: Map<string, string>) {
+  return html.replace(/\b(href|src)="([^"]+)"/g, (_match, attribute, value) => {
+    if (
+      value.startsWith("#") ||
+      value.startsWith("/") ||
+      value.startsWith("//") ||
+      value.startsWith("http:") ||
+      value.startsWith("https:") ||
+      value.startsWith("mailto:") ||
+      value.startsWith("data:") ||
+      value.startsWith("javascript:")
+    ) {
+      return `${attribute}="${value}"`;
+    }
+
+    const hashIndex = value.indexOf("#");
+    const target = hashIndex >= 0 ? value.slice(0, hashIndex) : value;
+    const fragment = hashIndex >= 0 ? value.slice(hashIndex) : "";
+    const pageId = path.posix.basename(target, ".html");
+    const siteRoute = routeMap.get(pageId);
+    if (siteRoute) return `${attribute}="${siteRoute}${fragment}"`;
+
+    const normalizedTarget = path.posix.normalize(path.posix.join("/reference/doxygen", target));
+    return `${attribute}="${withSiteBase(`${normalizedTarget}${fragment}`)}"`;
+  });
+}
+
+export function getGeneratedLibraryDocument(library: Library): GeneratedLibraryDocument | null {
+  const generatedPath = path.join(docsDir, library.oldPath);
+  if (!fs.existsSync(generatedPath)) return null;
+
+  const source = fs.readFileSync(generatedPath, "utf8");
+  const contentsStart = source.indexOf('<div class="contents">');
+  const contentsEnd = source.indexOf("</div></div><!-- contents -->", contentsStart);
+  if (contentsStart < 0 || contentsEnd < 0) return null;
+
+  const contents = source.slice(contentsStart + '<div class="contents">'.length, contentsEnd);
+  const textBlockStart = contents.indexOf('<div class="textblock">');
+  if (textBlockStart < 0) return null;
+
+  const tocHtml = contents.slice(0, textBlockStart).replace(/^\s+|\s+$/g, "");
+  const contentHtml = rewriteGeneratedDoxygenLinks(contents.slice(textBlockStart).trim(), getRouteMap());
+  return { tocHtml, contentHtml };
 }
 
 export function renderGuideMarkdown(guide: Guide) {
