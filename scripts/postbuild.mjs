@@ -56,6 +56,7 @@ for (const [file, target] of Object.entries(legacyRedirects)) {
 }
 
 writeRedirect(path.join("site", "blog", "blog.html"), "https://pagghiu.github.io");
+writeRedirect(path.join("SaneCppLibraries", "guides", "libraries", "index.html"), "/SaneCppLibraries/libraries/");
 
 fs.writeFileSync(
   path.join(saneSectionDir, "build-info.json"),

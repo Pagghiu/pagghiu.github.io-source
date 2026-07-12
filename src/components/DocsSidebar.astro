@@ -12,6 +12,9 @@ const librariesOpen = isLibrary || isHome || !isGuide;
 const guidesOpen = isGuide;
 
 const isActive = (href: string) => pathname === withBase(href);
+const guideHref = (slug: string) => slug === "single-file-libs"
+  ? withBase("/reference/doxygen/page_single_file_libs.html")
+  : withBase(`/guides/${slug}/`);
 ---
 
 <aside class="docs-sidebar" aria-label="Sane C++ documentation">
@@ -38,7 +41,7 @@ const isActive = (href: string) => pathname === withBase(href);
     <nav aria-label="Guides">
       <a class:list={{ active: pathname === withBase("/guides/") }} href={withBase("/guides/")}>Guide index</a>
       {guides.map((guide) => (
-        <a class:list={{ active: isActive(`/guides/${guide.slug}/`) }} href={withBase(`/guides/${guide.slug}/`)} aria-current={isActive(`/guides/${guide.slug}/`) ? "page" : undefined}>
+        <a class:list={{ active: isActive(`/guides/${guide.slug}/`) }} href={guideHref(guide.slug)} aria-current={isActive(`/guides/${guide.slug}/`) ? "page" : undefined}>
           {guide.title}
         </a>
       ))}

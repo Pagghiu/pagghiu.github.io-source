@@ -146,7 +146,15 @@ const guideMetadata: Record<string, { summary: string; icon: string; intro?: str
   },
   page_tools: {
     icon: "build",
-    summary: "Use self-contained C++ tools that compile on demand through the repository bootstrap scripts."
+    summary: "Understand the self-contained C++ tools compiled on demand through the repository bootstrap scripts."
+  },
+  page_package: {
+    icon: "deployed_code",
+    summary: "Install and inspect pinned development tools, cross toolchains, sysroots, and runners with SC::Package."
+  },
+  page_format: {
+    icon: "format_indent_increase",
+    summary: "Format the repository or check formatting in CI with SC::Format."
   }
 };
 
@@ -247,8 +255,8 @@ function parseMaturity(raw: string) {
 }
 
 export function getGuides(): Guide[] {
-  return readFiles(pagesDir)
-    .filter((file) => path.basename(file) !== "Index.md")
+  const guides = readFiles(pagesDir)
+    .filter((file) => !["Index.md", "Libraries.md"].includes(path.basename(file)))
     .map((file) => {
       const raw = fs.readFileSync(file, "utf8");
       const header = extractPageHeader(raw);
@@ -265,6 +273,22 @@ export function getGuides(): Guide[] {
         sourcePath: file
       };
     });
+
+  const toolsSource = path.join(pagesDir, "Tools.md");
+  for (const synthetic of [
+    { slug: "package", title: "SC::Package", pageId: "page_package", oldPath: "page_tools.html" },
+    { slug: "format", title: "SC::Format", pageId: "page_format", oldPath: "page_tools.html" }
+  ]) {
+    const metadata = guideMeta(synthetic.pageId, synthetic.slug);
+    guides.push({
+      ...synthetic,
+      summary: metadata.summary,
+      icon: metadata.icon,
+      sourcePath: toolsSource
+    });
+  }
+
+  return guides;
 }
 
 export function getLibraries(): Library[] {
@@ -578,7 +602,23 @@ export function getGeneratedLibraryDocument(library: Library): GeneratedLibraryD
 }
 
 export function renderGuideMarkdown(guide: Guide) {
-  const source = fs.readFileSync(guide.sourcePath, "utf8");
+  let source = fs.readFileSync(guide.sourcePath, "utf8");
+  if (guide.slug === "package") {
+    source = `@page page_package SC::Package\n\n${source.slice(
+      source.indexOf("# SC-package.cpp") + "# SC-package.cpp".length,
+      source.indexOf("# SC-format.cpp")
+    ).trim()}`;
+  } else if (guide.slug === "format") {
+    source = `@page page_format SC::Format\n\n${source.slice(
+      source.indexOf("# SC-format.cpp") + "# SC-format.cpp".length,
+      source.indexOf("# How does it work")
+    ).trim()}`;
+  } else if (guide.slug === "tools") {
+    const overviewEnd = source.indexOf("# SC-build.cpp");
+    const implementationStart = source.indexOf("# How does it work");
+    source = `${source.slice(0, overviewEnd).trim()}\n\n${source.slice(implementationStart).trim()}`;
+  }
+
   let markdown = preprocessMarkdown(source, getRouteMap(), "guide");
   markdown = removeLeadingTitle(markdown, guide.title);
   markdown = removeLeadingIntro(markdown, guide.summary);
