@@ -117,6 +117,28 @@ pre {
   background: color-mix(in srgb, var(--bg-card) 92%, var(--bg));
 }
 
+.shiki,
+.shiki span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+}
+
+html[data-theme="dark"] .shiki,
+html[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+.shiki code {
+  display: grid;
+  min-width: max-content;
+  line-height: 1.55;
+}
+
+.shiki .line {
+  min-height: 1.55em;
+}
+
 main {
   padding-bottom: 6rem;
 }

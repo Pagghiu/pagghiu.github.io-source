@@ -15,14 +15,50 @@ const blogDir = path.join(sourceRoot, "content", "blog");
 const siteBase = "/SaneCppLibraries";
 const docsDir = path.join(repoRoot, "_Build", "_Documentation", "docs");
 const repoGitHubRoot = "https://github.com/Pagghiu/SaneCppLibraries/blob/main";
-const cppHighlighter = await createHighlighter({
+const codeHighlighter = await createHighlighter({
   themes: ["github-light", "catppuccin-mocha"],
-  langs: ["cpp"]
+  langs: ["cpp", "bash", "bat", "powershell"]
 });
+
+const markdownCodeLanguages = new Map([
+  ["c++", "cpp"],
+  ["cc", "cpp"],
+  ["cpp", "cpp"],
+  ["cxx", "cpp"],
+  ["bash", "bash"],
+  ["console", "bash"],
+  ["sh", "bash"],
+  ["shell", "bash"],
+  ["shellscript", "bash"],
+  ["zsh", "bash"],
+  ["bat", "bat"],
+  ["batch", "bat"],
+  ["cmd", "bat"],
+  ["powershell", "powershell"],
+  ["ps1", "powershell"]
+]);
 
 marked.setOptions({
   gfm: true,
   breaks: false
+});
+
+marked.use({
+  renderer: {
+    code({ text, lang }) {
+      const requestedLanguage = lang?.trim().split(/\s+/)[0].toLowerCase() ?? "";
+      const language = markdownCodeLanguages.get(requestedLanguage);
+      if (!language) return false;
+
+      return codeHighlighter.codeToHtml(text, {
+        lang: language,
+        themes: {
+          light: "github-light",
+          dark: "catppuccin-mocha"
+        }
+      });
+    }
+  }
 });
 
 export type Guide = {
@@ -601,7 +637,7 @@ function highlightDoxygenCppFragments(html: string) {
       return decodeHTML(withoutTags);
     }).join("\n");
 
-    return cppHighlighter.codeToHtml(code, {
+    return codeHighlighter.codeToHtml(code, {
       lang: "cpp",
       themes: {
         light: "github-light",
