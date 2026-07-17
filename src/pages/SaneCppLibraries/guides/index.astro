@@ -22,20 +22,15 @@ const sections = [...new Set(guides.map((guide) => guide.section))].map((title) 
         <section class="guide-section">
           <h2>{section.title}</h2>
           <div class="card-grid grid">
-            {section.guides.map((guide) => {
-              const href = guide.slug === "single-file-libs"
-                ? withBase("/reference/doxygen/page_single_file_libs.html")
-                : withBase(`/guides/${guide.slug}/`);
-              return (
-                <a class="card guide-card" href={href}>
-                  <span class="material-symbols-outlined" aria-hidden="true">{guide.icon}</span>
-                  <div>
-                    <strong>{guide.title}</strong>
-                    <p>{guide.summary}</p>
-                  </div>
-                </a>
-              );
-            })}
+            {section.guides.map((guide) => (
+              <a class="card guide-card" href={withBase(`/guides/${guide.slug}/`)}>
+                <span class="material-symbols-outlined" aria-hidden="true">{guide.icon}</span>
+                <div>
+                  <strong>{guide.title}</strong>
+                  <p>{guide.summary}</p>
+                </div>
+              </a>
+            ))}
           </div>
         </section>
       ))}

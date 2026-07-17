@@ -93,6 +93,17 @@ export type GeneratedLibraryDocument = {
   contentHtml: string;
 };
 
+export type CoverageSummary = {
+  created: string;
+  metrics: Array<{
+    label: string;
+    percentage: number;
+    covered: number;
+    total: number;
+    tone: "strong" | "moderate" | "low";
+  }>;
+};
+
 export type BlogPost = {
   slug: string;
   title: string;
@@ -171,12 +182,6 @@ const guideMetadata: Record<string, { summary: string; icon: string; intro?: str
     intro:
       "These principles describe the shape of Sane C++ Libraries. They keep the code small, explicit, portable, and predictable enough for agents to modify without silently changing the project model."
   },
-  page_single_file_libs: {
-    icon: "inventory_2",
-    summary: "Open the generated amalgamation tool for standalone single-file headers.",
-    fallback:
-      "The in-browser amalgamation tool is still served from the generated reference pages because it depends on the repository's bundled JavaScript tool.\n\nOpen the [legacy generated amalgamation tool](/SaneCppLibraries/reference/doxygen/page_single_file_libs.html) to pick a library and download its standalone header."
-  },
   page_tests: {
     icon: "fact_check",
     summary: "Understand where tests live, how they double as examples, and how coverage is published."
@@ -198,7 +203,6 @@ const guideMetadata: Record<string, { summary: string; icon: string; intro?: str
 const guideNavigation: Record<string, { order: number; section: string }> = {
   "building-user": { order: 10, section: "Start here" },
   examples: { order: 20, section: "Start here" },
-  "single-file-libs": { order: 30, section: "Start here" },
   build: { order: 40, section: "Build and tooling" },
   "build-external": { order: 50, section: "Build and tooling" },
   package: { order: 60, section: "Build and tooling" },
@@ -310,7 +314,7 @@ function parseMaturity(raw: string) {
 
 export function getGuides(): Guide[] {
   const guides = readFiles(pagesDir)
-    .filter((file) => !["Index.md", "Libraries.md"].includes(path.basename(file)))
+    .filter((file) => !["Index.md", "Libraries.md", "SingleFileLibs.md"].includes(path.basename(file)))
     .map((file) => {
       const raw = fs.readFileSync(file, "utf8");
       const header = extractPageHeader(raw);
@@ -583,6 +587,11 @@ function removeLeadingIntro(markdown: string, summary: string) {
   return markdown;
 }
 
+function normalizeGuideHeadings(markdown: string) {
+  if (!/^#\s+/m.test(markdown)) return markdown;
+  return markdown.replace(/^(#{1,5})(\s+)/gm, "#$1$2");
+}
+
 function getRouteMap() {
   const map = new Map<string, string>();
   for (const guide of getGuides()) {
@@ -697,7 +706,37 @@ export function renderGuideMarkdown(guide: Guide) {
     markdown = metadata.fallback;
   }
 
-  return marked.parse(markdown);
+  return marked.parse(normalizeGuideHeadings(markdown));
+}
+
+export function getCoverageSummary(): CoverageSummary | null {
+  const reportPath = path.join(docsDir, "coverage", "index.html");
+  if (!fs.existsSync(reportPath)) return null;
+
+  const report = fs.readFileSync(reportPath, "utf8");
+  const totalsRow = report.match(/<tr class=["']light-row-bold["']><td><pre>Totals<\/pre><\/td>([\s\S]*?)<\/tr>/i)?.[1];
+  if (!totalsRow) return null;
+
+  const values = Array.from(
+    totalsRow.matchAll(/<td class=["']column-entry-[^"']+["']><pre>\s*([\d.]+)%\s*\((\d+)\/(\d+)\)<\/pre><\/td>/gi)
+  );
+  const labels = ["Functions", "Lines", "Regions", "Branches"];
+  if (values.length < labels.length) return null;
+
+  const created = decodeHTML(report.match(/<h4>Created:\s*([^<]+)<\/h4>/i)?.[1]?.trim() ?? "Latest publish");
+  return {
+    created,
+    metrics: labels.map((label, index) => {
+      const percentage = Number(values[index][1]);
+      return {
+        label,
+        percentage,
+        covered: Number(values[index][2]),
+        total: Number(values[index][3]),
+        tone: percentage >= 90 ? "strong" : percentage >= 80 ? "moderate" : "low"
+      };
+    })
+  };
 }
 
 export function getHomeMetrics() {

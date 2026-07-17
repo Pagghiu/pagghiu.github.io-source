@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { getGuides, renderGuideMarkdown } from "../../../lib/site-data";
+import GuideFlow from "../../../components/GuideFlow.astro";
+import { getCoverageSummary, getGuides, renderGuideMarkdown } from "../../../lib/site-data";
 import { withBase } from "../../../lib/base";
 import { decodeHTML } from "entities";
 
@@ -24,7 +25,14 @@ html = html.replace(/<h([1-3])>([\s\S]*?)<\/h\1>/g, (_match, levelText, contents
 
 const isPlatforms = guide.slug === "platforms";
 const isTests = guide.slug === "tests";
-const isSingleFile = guide.slug === "single-file-libs";
+const coverageSummary = isTests ? getCoverageSummary() : null;
+const guideFlows = {
+  build: "build",
+  "build-external": "build-external",
+  package: "package",
+  tools: "tools"
+} as const;
+const guideFlow = guideFlows[guide.slug as keyof typeof guideFlows];
 const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => item.level)) : 1;
 ---
 
@@ -37,53 +45,65 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
     </div>
   </section>
   <section class="shell page-grid">
-    {isPlatforms ? (
-      <article class="platform-guide">
-        <section class="platform-band supported">
-          <div class="platform-band-heading">
-            <span class="material-symbols-outlined" aria-hidden="true">verified</span>
-            <div><span>Supported</span><h2>Production targets</h2></div>
-          </div>
-          <div class="platform-cards">
-            <div class="platform-card"><span class="material-symbols-outlined">laptop_mac</span><strong>Apple</strong><p>macOS 13.6+ and iOS 14.0+</p></div>
-            <div class="platform-card"><span class="material-symbols-outlined">desktop_windows</span><strong>Windows</strong><p>Windows 10 and newer</p></div>
-            <div class="platform-card"><span class="material-symbols-outlined">terminal</span><strong>Linux</strong><p>Linux kernel 5.x and newer</p></div>
-          </div>
-        </section>
-        <section class="platform-band future">
-          <div class="platform-band-heading"><span class="material-symbols-outlined">experiment</span><div><span>Planned</span><h2>WebAssembly</h2></div></div>
-          <p>Emscripten and WASI are intended future targets, but are not part of the supported matrix today.</p>
-        </section>
-        <section class="platform-band excluded">
-          <div class="platform-band-heading"><span class="material-symbols-outlined">block</span><div><span>Not planned</span><h2>Android</h2></div></div>
-          <p>Android is not currently on the project roadmap.</p>
-        </section>
-      </article>
-    ) : isSingleFile ? (
-      <article class="panel action-guide">
-        <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
-        <div>
-          <h2>Generate a standalone header</h2>
-          <p>The amalgamation tool is an interactive generated page. Open it to select a library, inspect its dependencies, and download the resulting single-file header.</p>
-          <a class="button primary" href={withBase("/reference/doxygen/page_single_file_libs.html")}>Open amalgamation tool</a>
-        </div>
-      </article>
-    ) : (
-      <article class="panel prose article" set:html={html} />
-    )}
+    <div class="guide-primary">
+      {guideFlow && <GuideFlow variant={guideFlow} />}
+      {isPlatforms ? (
+        <article class="platform-guide">
+          <section class="platform-band supported">
+            <div class="platform-band-heading">
+              <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+              <div><span>Supported</span><h2>Production targets</h2></div>
+            </div>
+            <div class="platform-cards">
+              <div class="platform-card"><span class="material-symbols-outlined">laptop_mac</span><strong>Apple</strong><p>macOS 13.6+ and iOS 14.0+</p></div>
+              <div class="platform-card"><span class="material-symbols-outlined">desktop_windows</span><strong>Windows</strong><p>Windows 10 and newer</p></div>
+              <div class="platform-card"><span class="material-symbols-outlined">terminal</span><strong>Linux</strong><p>Linux kernel 5.x and newer</p></div>
+            </div>
+          </section>
+          <section class="platform-band future">
+            <div class="platform-band-heading"><span class="material-symbols-outlined">experiment</span><div><span>Planned</span><h2>WebAssembly</h2></div></div>
+            <p>Emscripten and WASI are intended future targets, but are not part of the supported matrix today.</p>
+          </section>
+          <section class="platform-band excluded">
+            <div class="platform-band-heading"><span class="material-symbols-outlined">block</span><div><span>Not planned</span><h2>Android</h2></div></div>
+            <p>Android is not currently on the project roadmap.</p>
+          </section>
+        </article>
+      ) : (
+        <article class="panel prose article" set:html={html} />
+      )}
 
-    {isTests && (
-      <section class="coverage-panel panel">
-        <div class="coverage-heading">
-          <div><span class="eyebrow">Live report</span><h2>Current test coverage</h2></div>
-          <a class="button" href={withBase("/reference/doxygen/coverage/")}>Open full report</a>
-        </div>
-        <iframe title="Sane C++ Libraries test coverage" src="https://pagghiu.github.io/SaneCppLibraries/reference/doxygen/coverage/" loading="lazy"></iframe>
-      </section>
-    )}
+      {isTests && (
+        <section class="coverage-panel panel">
+          <div class="coverage-heading">
+            <div><span class="eyebrow">Generated on publish</span><h2>Current test coverage</h2></div>
+            <a class="button" href={withBase("/reference/doxygen/coverage/")}>Open file report</a>
+          </div>
+          {coverageSummary ? (
+            <>
+              <div class="coverage-metrics">
+                {coverageSummary.metrics.map((metric) => (
+                  <div class:list={["coverage-metric", metric.tone]} style={`--coverage: ${metric.percentage}%`}>
+                    <span>{metric.label}</span>
+                    <strong>{metric.percentage.toFixed(2)}%</strong>
+                    <small>{metric.covered.toLocaleString()} of {metric.total.toLocaleString()}</small>
+                    <div class="coverage-bar" aria-label={`${metric.label}: ${metric.percentage.toFixed(2)} percent`}>
+                      <span></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p class="coverage-created">Report generated {coverageSummary.created}.</p>
+            </>
+          ) : (
+            <p class="coverage-unavailable">Coverage totals appear here in published builds. Generate local coverage to preview them before publication.</p>
+          )}
+        </section>
+      )}
+    </div>
 
     <aside class="sidebar">
-      {tocItems.length > 1 && !isPlatforms && !isSingleFile && (
+      {tocItems.length > 1 && !isPlatforms && (
         <div class="card toc-card">
           <strong>On this page</strong>
           <nav aria-label="Page sections">
@@ -110,6 +130,12 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
     gap: 1.25rem;
+    min-width: 0;
+  }
+
+  .guide-primary {
+    display: grid;
+    gap: 1rem;
     min-width: 0;
   }
 
@@ -214,7 +240,6 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
   }
 
   .platform-band h2,
-  .action-guide h2,
   .coverage-heading h2 {
     margin: 0;
   }
@@ -239,32 +264,13 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
   }
 
   .platform-card p,
-  .platform-band > p,
-  .action-guide p {
+  .platform-band > p {
     margin: 0;
     color: var(--muted-strong);
   }
 
-  .action-guide {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 1rem;
-    padding: 1.5rem;
-    align-items: start;
-  }
-
-  .action-guide > .material-symbols-outlined {
-    color: var(--link);
-    font-size: 2rem;
-  }
-
-  .action-guide p {
-    margin: 0.75rem 0 1.2rem;
-  }
-
   .coverage-panel {
-    grid-column: 1;
-    padding: 1rem;
+    padding: 1.25rem;
   }
 
   .coverage-heading {
@@ -275,12 +281,55 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
     margin-bottom: 1rem;
   }
 
-  .coverage-panel iframe {
-    width: 100%;
-    min-height: 70vh;
+  .coverage-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .coverage-metric {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.9rem;
     border: 1px solid var(--border);
     border-radius: 6px;
-    background: white;
+    background: var(--surface-soft);
+  }
+
+  .coverage-metric > span,
+  .coverage-metric small,
+  .coverage-created,
+  .coverage-unavailable {
+    color: var(--muted);
+  }
+
+  .coverage-metric strong {
+    font-size: 1.35rem;
+  }
+
+  .coverage-bar {
+    height: 0.4rem;
+    margin-top: 0.35rem;
+    overflow: hidden;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--border-strong) 70%, transparent);
+  }
+
+  .coverage-bar span {
+    display: block;
+    width: var(--coverage);
+    height: 100%;
+    background: var(--coverage-color);
+  }
+
+  .coverage-metric.strong { --coverage-color: var(--success); }
+  .coverage-metric.moderate { --coverage-color: #c58a00; }
+  .coverage-metric.low { --coverage-color: #d24b55; }
+
+  .coverage-created,
+  .coverage-unavailable {
+    margin: 0.9rem 0 0;
+    font-size: 0.88rem;
   }
 
   @media (max-width: 960px) {
@@ -295,6 +344,21 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
     }
 
     .platform-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .coverage-metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 520px) {
+    .coverage-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .coverage-metrics {
       grid-template-columns: 1fr;
     }
   }

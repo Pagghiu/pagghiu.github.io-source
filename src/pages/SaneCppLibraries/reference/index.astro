@@ -3,7 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { withBase } from "../../../lib/base";
 ---
 
-<BaseLayout title="Reference | Sane C++ Libraries" description="Generated reference docs, compatibility routes, single-file tooling, and coverage artifacts.">
+<BaseLayout title="Reference | Sane C++ Libraries" description="Generated reference docs, compatibility routes, coverage artifacts, and curated library pages.">
   <section class="shell page-hero">
     <div class="section-heading">
       <div class="eyebrow">Reference Layer</div>
@@ -18,13 +18,6 @@ import { withBase } from "../../../lib/base";
         <div>
           <strong>Doxygen reference</strong>
           <p>Open the generated documentation subtree that is copied into the final Pages artifact.</p>
-        </div>
-      </a>
-      <a class="card reference-card" href={withBase("/reference/doxygen/page_single_file_libs.html")}>
-        <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
-        <div>
-          <strong>Single-file library browser</strong>
-          <p>Generate the standalone library headers used by the single-file integration path.</p>
         </div>
       </a>
       <a class="card reference-card" href={withBase("/reference/doxygen/coverage/")}>

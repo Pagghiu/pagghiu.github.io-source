@@ -1,0 +1,212 @@
+---
+interface Props {
+  variant: "build" | "build-external" | "package" | "tools";
+}
+
+const { variant } = Astro.props;
+
+const flows = {
+  build: {
+    eyebrow: "Build pipeline",
+    title: "From command to output",
+    stages: [
+      { icon: "terminal", label: "SC.sh or SC.bat", detail: "Select an action and target" },
+      { icon: "code", label: "C++ definition", detail: "Compile SC-build.cpp when stale" },
+      { icon: "account_tree", label: "Project graph", detail: "Resolve projects and configurations" }
+    ],
+    outcomes: [
+      { icon: "memory", label: "Native backend", detail: "Compile and link now" },
+      { icon: "developer_board", label: "Generated backend", detail: "Write IDE or Make projects" }
+    ]
+  },
+  "build-external": {
+    eyebrow: "External build pipeline",
+    title: "Your project stays in control",
+    stages: [
+      { icon: "description", label: "Project definition", detail: "Your repository owns SC-build.cpp" },
+      { icon: "pin", label: "Resolve revision", detail: "Use a vendored, shared, or cached checkout" },
+      { icon: "code", label: "Compile definition", detail: "Build only when its inputs changed" },
+      { icon: "deployed_code", label: "Build target", detail: "Produce your project outputs" }
+    ],
+    outcomes: []
+  },
+  package: {
+    eyebrow: "Package lifecycle",
+    title: "From recipe to build capability",
+    stages: [
+      { icon: "menu_book", label: "Recipe", detail: "Describe acquisition and validation" },
+      { icon: "download", label: "Install or import", detail: "Acquire the development tool" },
+      { icon: "verified", label: "Validate", detail: "Check the expected layout" },
+      { icon: "inventory", label: "Receipt and exports", detail: "Expose named tools and sysroots" }
+    ],
+    outcomes: []
+  },
+  tools: {
+    eyebrow: "Tool bootstrap",
+    title: "Compile only what changed",
+    stages: [
+      { icon: "rocket_launch", label: "Bootstrap", detail: "Build ToolsBootstrap when stale" },
+      { icon: "search", label: "Locate tool", detail: "Resolve the selected C++ source" },
+      { icon: "build", label: "Compile", detail: "Reuse unchanged support objects" },
+      { icon: "play_arrow", label: "Run", detail: "Forward the action and arguments" }
+    ],
+    outcomes: []
+  }
+} as const;
+
+const flow = flows[variant];
+---
+
+<section class="guide-flow panel" aria-labelledby={`${variant}-flow-title`}>
+  <header>
+    <span class="eyebrow">{flow.eyebrow}</span>
+    <h2 id={`${variant}-flow-title`}>{flow.title}</h2>
+  </header>
+  <div class="flow-track">
+    {flow.stages.map((stage, index) => (
+      <div class="flow-step">
+        <span class="step-number" aria-hidden="true">{index + 1}</span>
+        <span class="material-symbols-outlined" aria-hidden="true">{stage.icon}</span>
+        <strong>{stage.label}</strong>
+        <small>{stage.detail}</small>
+      </div>
+    ))}
+    {flow.outcomes.length > 0 && (
+      <div class="flow-outcomes" aria-label="Backend choices">
+        {flow.outcomes.map((outcome) => (
+          <div class="flow-outcome">
+            <span class="material-symbols-outlined" aria-hidden="true">{outcome.icon}</span>
+            <span><strong>{outcome.label}</strong><small>{outcome.detail}</small></span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .guide-flow {
+    padding: 1.25rem;
+    overflow: hidden;
+  }
+
+  header {
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    margin: 0.25rem 0 0;
+    font-size: 1.35rem;
+  }
+
+  .flow-track {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.6rem;
+    align-items: stretch;
+  }
+
+  .flow-step {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35rem 0.55rem;
+    align-content: start;
+    min-width: 0;
+    padding: 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface-soft);
+  }
+
+  .flow-step:not(:last-child)::after {
+    content: "arrow_forward";
+    position: absolute;
+    left: calc(100% + 0.35rem);
+    top: 50%;
+    width: 0.9rem;
+    color: var(--accent-strong);
+    font-family: "Material Symbols Outlined";
+    font-size: 1.1rem;
+    line-height: 1;
+    transform: translateY(-50%);
+  }
+
+  .flow-step > .material-symbols-outlined {
+    color: var(--accent-cool);
+    font-size: 1.35rem;
+  }
+
+  .flow-step strong,
+  .flow-step small {
+    min-width: 0;
+  }
+
+  .flow-step small {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .step-number {
+    position: absolute;
+    top: -0.55rem;
+    right: 0.55rem;
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    color: var(--surface);
+    background: var(--accent-cool);
+    font-size: 0.72rem;
+    font-weight: 850;
+  }
+
+  .flow-outcomes {
+    grid-column: 4;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .flow-outcome {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.7rem;
+    border-left: 3px solid var(--accent-strong);
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface-soft));
+  }
+
+  .flow-outcome .material-symbols-outlined {
+    color: var(--link);
+  }
+
+  .flow-outcome strong,
+  .flow-outcome small {
+    display: block;
+  }
+
+  .flow-outcome small {
+    margin-top: 0.15rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 760px) {
+    .flow-track {
+      grid-template-columns: 1fr;
+      gap: 1.35rem;
+    }
+
+    .flow-step:not(:last-child)::after {
+      content: "arrow_downward";
+      left: 50%;
+      top: calc(100% + 0.2rem);
+      transform: translateX(-50%);
+    }
+
+    .flow-outcomes {
+      grid-column: 1;
+    }
+  }
+</style>
