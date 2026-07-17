@@ -30,6 +30,7 @@ export type Guide = {
   title: string;
   summary: string;
   icon: string;
+  section: string;
   pageId: string;
   oldPath: string;
   sourcePath: string;
@@ -92,11 +93,11 @@ const symbolLinkCache = new Map<string, string | null>();
 const guideMetadata: Record<string, { summary: string; icon: string; intro?: string; fallback?: string }> = {
   page_build: {
     icon: "construction",
-    summary: "Describe builds in C++ and use SC::Build to generate projects or build directly through the native backend."
+    summary: "Learn how a C++ build description becomes native outputs or generated IDE projects."
   },
   page_build_external: {
     icon: "hub",
-    summary: "Use SC-build launchers from an external project with a vendored, shared-checkout, or cached Sane C++ layout."
+    summary: "Adopt SC::Build in another repository with a vendored, shared, or revision-pinned cached checkout."
   },
   page_building_contributor: {
     icon: "engineering",
@@ -104,7 +105,7 @@ const guideMetadata: Record<string, { summary: string; icon: string; intro?: str
   },
   page_building_user: {
     icon: "add_box",
-    summary: "Add the libraries to an existing project without adopting the repository test suite or project-generation workflow."
+    summary: "Choose a source-integration form and add the libraries to an existing C++ program."
   },
   page_coding_style: {
     icon: "format_align_left",
@@ -116,7 +117,7 @@ const guideMetadata: Record<string, { summary: string; icon: string; intro?: str
   },
   page_faq: {
     icon: "help",
-    summary: "Answers for standard-library mode, exceptions, RTTI, STL integration, debug visualizers, and compatibility questions."
+    summary: "Make informed choices about STL interoperability, strict mode, debugger support, and stability."
   },
   libraries: {
     icon: "table_rows",
@@ -146,7 +147,7 @@ const guideMetadata: Record<string, { summary: string; icon: string; intro?: str
   },
   page_tools: {
     icon: "build",
-    summary: "Understand the self-contained C++ tools compiled on demand through the repository bootstrap scripts."
+    summary: "Learn how the bootstrap compiles small repository tools on demand and when to write one."
   },
   page_package: {
     icon: "deployed_code",
@@ -156,6 +157,23 @@ const guideMetadata: Record<string, { summary: string; icon: string; intro?: str
     icon: "format_indent_increase",
     summary: "Format the repository or check formatting in CI with SC::Format."
   }
+};
+
+const guideNavigation: Record<string, { order: number; section: string }> = {
+  "building-user": { order: 10, section: "Start here" },
+  examples: { order: 20, section: "Start here" },
+  "single-file-libs": { order: 30, section: "Start here" },
+  build: { order: 40, section: "Build and tooling" },
+  "build-external": { order: 50, section: "Build and tooling" },
+  package: { order: 60, section: "Build and tooling" },
+  format: { order: 70, section: "Build and tooling" },
+  tools: { order: 80, section: "Build and tooling" },
+  platforms: { order: 90, section: "Understand the project" },
+  tests: { order: 100, section: "Understand the project" },
+  faq: { order: 110, section: "Understand the project" },
+  principles: { order: 120, section: "Understand the project" },
+  "building-contributor": { order: 130, section: "Contributing" },
+  "coding-style": { order: 140, section: "Contributing" }
 };
 
 function readFiles(directory: string) {
@@ -262,12 +280,14 @@ export function getGuides(): Guide[] {
       const header = extractPageHeader(raw);
       const slug = normalizeSlug(header.pageId || path.basename(file, ".md"));
       const metadata = guideMeta(header.pageId, slug);
+      const navigation = guideNavigation[slug] ?? { order: 1000, section: "More" };
       const summary = metadata.summary || cleanInlineText(header.brief || firstMeaningfulLine(raw));
       return {
         slug,
         title: header.title || path.basename(file, ".md"),
         summary,
         icon: metadata.icon,
+        section: navigation.section,
         pageId: header.pageId,
         oldPath: `${header.pageId}.html`,
         sourcePath: file
@@ -280,15 +300,21 @@ export function getGuides(): Guide[] {
     { slug: "format", title: "SC::Format", pageId: "page_format", oldPath: "page_tools.html" }
   ]) {
     const metadata = guideMeta(synthetic.pageId, synthetic.slug);
+    const navigation = guideNavigation[synthetic.slug] ?? { order: 1000, section: "More" };
     guides.push({
       ...synthetic,
       summary: metadata.summary,
       icon: metadata.icon,
+      section: navigation.section,
       sourcePath: toolsSource
     });
   }
 
-  return guides;
+  return guides.sort((left, right) => {
+    const leftOrder = guideNavigation[left.slug]?.order ?? 1000;
+    const rightOrder = guideNavigation[right.slug]?.order ?? 1000;
+    return leftOrder - rightOrder || left.title.localeCompare(right.title);
+  });
 }
 
 export function getLibraries(): Library[] {

@@ -4,6 +4,10 @@ import { getGuides } from "../../../lib/site-data";
 import { withBase } from "../../../lib/base";
 
 const guides = getGuides();
+const sections = [...new Set(guides.map((guide) => guide.section))].map((title) => ({
+  title,
+  guides: guides.filter((guide) => guide.section === title)
+}));
 ---
 
 <BaseLayout title="Guides | Sane C++ Libraries" description="Practical guides for using, integrating, building, and contributing to Sane C++ Libraries.">
@@ -13,21 +17,28 @@ const guides = getGuides();
       <h1>Practical guides</h1>
       <p>These pages are sourced from the repo docs and organized around common tasks.</p>
     </div>
-    <div class="card-grid grid">
-      {guides.map((guide) => {
-        const href = guide.slug === "single-file-libs"
-          ? withBase("/reference/doxygen/page_single_file_libs.html")
-          : withBase(`/guides/${guide.slug}/`);
-        return (
-          <a class="card guide-card" href={href}>
-            <span class="material-symbols-outlined" aria-hidden="true">{guide.icon}</span>
-            <div>
-              <strong>{guide.title}</strong>
-              <p>{guide.summary}</p>
-            </div>
-          </a>
-        );
-      })}
+    <div class="guide-sections">
+      {sections.map((section) => (
+        <section class="guide-section">
+          <h2>{section.title}</h2>
+          <div class="card-grid grid">
+            {section.guides.map((guide) => {
+              const href = guide.slug === "single-file-libs"
+                ? withBase("/reference/doxygen/page_single_file_libs.html")
+                : withBase(`/guides/${guide.slug}/`);
+              return (
+                <a class="card guide-card" href={href}>
+                  <span class="material-symbols-outlined" aria-hidden="true">{guide.icon}</span>
+                  <div>
+                    <strong>{guide.title}</strong>
+                    <p>{guide.summary}</p>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   </section>
 </BaseLayout>
@@ -35,6 +46,21 @@ const guides = getGuides();
 <style>
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .guide-sections,
+  .guide-section {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .guide-sections {
+    gap: 2.25rem;
+  }
+
+  .guide-section h2 {
+    margin: 0;
+    font-size: 1.35rem;
   }
 
   .guide-card {
