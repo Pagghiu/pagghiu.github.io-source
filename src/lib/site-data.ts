@@ -452,6 +452,10 @@ function preprocessMarkdown(
   currentKind: "guide" | "library"
 ) {
   let output = source;
+  output = output.replace(
+    /^\\htmlonly\s*\n(\s*<video\b[\s\S]*?<\/video>\s*)\n^\\endhtmlonly\s*$/gm,
+    "$1\n\n"
+  );
   output = output.replace(/^\\htmlonly[\s\S]*?^\\endhtmlonly\s*$/gm, "");
   output = output.replace(/^@page\s+.+$/gm, "");
   output = output.replace(/^@brief(?:[^\S\r\n].*)?$/gm, "");
