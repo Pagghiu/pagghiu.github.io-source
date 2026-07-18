@@ -168,6 +168,49 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
     white-space: nowrap;
   }
 
+  .article :global(.example-video-grid) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.25rem 0 2rem;
+  }
+
+  .article :global(.example-video-card) {
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-soft);
+  }
+
+  .article :global(.example-video-featured) {
+    grid-column: 1 / -1;
+  }
+
+  .article :global(.example-video-card h3),
+  .article :global(.example-video-card p) {
+    margin: 0;
+  }
+
+  .article :global(.example-video-card p) {
+    color: var(--muted-strong);
+    font-size: 0.92rem;
+  }
+
+  .article :global(.example-video-card video) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-top: 0.15rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    background: #070b13;
+    object-fit: contain;
+  }
+
   .sidebar {
     display: grid;
     gap: 1rem;
@@ -349,6 +392,16 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
 
     .coverage-metrics {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 680px) {
+    .article :global(.example-video-grid) {
+      grid-template-columns: 1fr;
+    }
+
+    .article :global(.example-video-featured) {
+      grid-column: auto;
     }
   }
 

@@ -519,8 +519,8 @@ function preprocessMarkdown(
 ) {
   let output = source;
   output = output.replace(
-    /^\\htmlonly\s*\n(\s*<video\b[\s\S]*?<\/video>\s*)\n^\\endhtmlonly\s*$/gm,
-    "$1\n\n"
+    /^\\htmlonly\s*\n([\s\S]*?)^\\endhtmlonly\s*$/gm,
+    (block, html) => /<video\b/i.test(html) ? `${html.trim()}\n\n` : block
   );
   output = output.replace(/^\\htmlonly[\s\S]*?^\\endhtmlonly\s*$/gm, "");
   output = output.replace(/^@page\s+.+$/gm, "");

@@ -9,7 +9,7 @@ const isGuide = pathname.includes("/guides/");
 const isLibrary = pathname.includes("/libraries/");
 const isHome = pathname === withBase("/");
 const librariesOpen = isLibrary || isHome || !isGuide;
-const guidesOpen = isGuide;
+const guidesOpen = true;
 
 const isActive = (href: string) => pathname === withBase(href);
 ---
