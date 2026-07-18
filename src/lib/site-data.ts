@@ -772,7 +772,7 @@ export function getHomeMetrics() {
 }
 
 export function getFeaturedLibraries() {
-  const slugs = ["foundation", "async", "plugin", "http", "process", "reflection"];
+  const slugs = ["async", "await", "fibers", "fibers-async", "process", "plugin"];
   const libraries = getLibraries();
   return slugs
     .map((slug) => libraries.find((library) => library.slug === slug))

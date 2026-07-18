@@ -7,139 +7,112 @@ import { withBase } from "../../../lib/base";
 
 const libraries = getLibraries();
 
-const groups = [
+const themes = [
   {
-    title: "Core constraints",
-    summary: "Types, memory, containers, strings, time, hashing, and tests.",
-    slugs: ["foundation", "memory", "containers", "strings", "time", "hashing", "testing"]
+    label: "Runtime",
+    tone: "runtime",
+    slugs: ["async", "async-streams", "await", "fibers", "fibers-async", "plugin", "process", "threading"]
   },
   {
-    title: "Runtime and I/O",
-    summary: "Files, sockets, processes, async, streams, and platform notifications.",
-    slugs: [
-      "async",
-      "async-streams",
-      "await",
-      "file",
-      "file-system",
-      "file-system-iterator",
-      "file-system-watcher",
-      "fibers",
-      "fibers-async",
-      "socket",
-      "process",
-      "serial-port",
-      "threading"
-    ]
+    label: "I/O",
+    tone: "io",
+    slugs: ["file", "file-system", "file-system-iterator", "file-system-watcher", "serial-port", "socket"]
   },
   {
-    title: "Data and protocols",
-    summary: "Reflection, serialization, HTTP, plugins, and integration points for real examples.",
-    slugs: [
-      "reflection",
-      "containers-reflection",
-      "serialization-text",
-      "serialization-binary",
-      "http",
-      "http-client",
-      "plugin"
-    ]
+    label: "Web",
+    tone: "web",
+    slugs: ["http", "http-client"]
+  },
+  {
+    label: "Data",
+    tone: "data",
+    slugs: ["containers", "containers-reflection", "reflection", "serialization-binary", "serialization-text"]
   }
 ];
 
-const groupedSlugs = new Set(groups.flatMap((group) => group.slugs));
-const groupedLibraries = groups.map((group) => ({
-  ...group,
-  libraries: group.slugs
-    .map((slug) => libraries.find((library) => library.slug === slug))
-    .filter((library): library is (typeof libraries)[number] => Boolean(library))
-}));
-const remainingLibraries = libraries.filter((library) => !groupedSlugs.has(library.slug));
+function themeFor(slug: string) {
+  return themes.find((theme) => theme.slugs.includes(slug)) ?? { label: "Foundation", tone: "foundation" };
+}
+
+const orderedLibraries = [...libraries].sort((left, right) => {
+  if (left.slug === "async") return -1;
+  if (right.slug === "async") return 1;
+  return left.title.localeCompare(right.title);
+});
 ---
 
-<BaseLayout title="Libraries | Sane C++ Libraries" description="Current Sane C++ library map with maturity, dependencies, downloads, and generated reference links.">
+<BaseLayout
+  title="Library Index | Sane C++ Libraries"
+  description="All Sane C++ libraries with themes, maturity, dependencies, downloads, and generated reference links."
+>
   <section class="shell page-hero library-landing">
     <div class="library-hero-copy">
-      <h1>Libraries</h1>
-      <p>
-        Use this catalog to choose the smallest useful library for your project.
-      </p>
+      <div class="eyebrow">Libraries</div>
+      <h1>Library index</h1>
+      <p>Start with Async or choose the smallest useful building block for your program.</p>
     </div>
 
     <div class="catalog-summary panel">
       <strong>{libraries.length}</strong>
       <span>libraries</span>
-      <small>Each tile links to the library page and generated reference.</small>
+      <small>Each row opens the library guide, dependencies, examples, and generated reference.</small>
     </div>
-
-    </div>
-
   </section>
 
-  <section class="shell library-groups">
-      <section class="library-group panel">
-        <div class="group-heading">
-          <div>
-            <div class="eyebrow">at a glance</div>
-            <h2>Libraries Map</h2>
-              <p>Most libraries are self-contained and independent.
-              <br>A few higher level libraries like <strong>Async</strong>, <strong>Plugin</strong>, <strong>Await</strong> or <strong>Http</strong> depend on others to expose more advanced features.
-              </p>
-          </div>
-        </div>
-        <div>
-          <img src="/images/dependencies/SaneCppLibrariesDependencies.svg" alt="Dependency map for Sane C++ Libraries" loading="lazy" />
-</div>
-      </section>
-    {groupedLibraries.map((group) => (
-      <section class="library-group panel">
-        <div class="group-heading">
-          <div>
-            <div class="eyebrow">{group.title}</div>
-            <h2>{group.summary}</h2>
-          </div>
-          <span>{group.libraries.length} libraries</span>
-        </div>
-        <div class="library-matrix">
-          {group.libraries.map((library) => (
-            <a class="library-cell" href={withBase(`/libraries/${library.slug}/`)}>
-              <LibraryIcon slug={library.slug} size="sm" />
-              <div>
-                <strong>{library.title}</strong>
-                <p>{library.summary}</p>
-                <small>{library.dependencies.length ? `Depends on ${library.dependencies.join(", ")}` : "No library dependency"}</small>
-              </div>
-              <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} />
-            </a>
-          ))}
-        </div>
-      </section>
-    ))}
+  <section class="shell dependency-overview panel">
+    <div class="overview-heading">
+      <div>
+        <div class="eyebrow">At a glance</div>
+        <h2>Library map</h2>
+      </div>
+      <p>
+        Most libraries are independent. Higher-level libraries such as Async, Await, FibersAsync, Http, and Plugin
+        combine smaller platform abstractions.
+      </p>
+    </div>
+    <div class="dependency-map-frame">
+      <img src="/images/dependencies/SaneCppLibrariesDependencies.svg" alt="Dependency map for Sane C++ Libraries" loading="lazy" />
+    </div>
+  </section>
 
-    {remainingLibraries.length > 0 && (
-      <section class="library-group panel">
-        <div class="group-heading">
-          <div>
-            <div class="eyebrow">Other libraries</div>
-            <h2>Additional libraries that do not fit the main groups yet.</h2>
-          </div>
-          <span>{remainingLibraries.length} libraries</span>
-        </div>
-        <div class="library-matrix">
-          {remainingLibraries.map((library) => (
-            <a class="library-cell" href={withBase(`/libraries/${library.slug}/`)}>
+  <section class="shell catalog-section">
+    <div class="section-heading">
+      <div class="eyebrow">All libraries</div>
+      <h2>One index, five themes</h2>
+      <p>Theme labels make related areas easier to scan without separating the catalog into different lists.</p>
+    </div>
+
+    <div class="library-table panel">
+      <div class="library-table-head" aria-hidden="true">
+        <div>Library</div>
+        <div>Theme / maturity</div>
+        <div>Description</div>
+        <div>Download</div>
+      </div>
+      {orderedLibraries.map((library) => {
+        const theme = themeFor(library.slug);
+        return (
+          <a class="library-row" href={withBase(`/libraries/${library.slug}/`)}>
+            <div class="library-name">
               <LibraryIcon slug={library.slug} size="sm" />
-              <div>
-                <strong>{library.title}</strong>
-                <p>{library.summary}</p>
-                <small>{library.dependencies.length ? `Depends on ${library.dependencies.join(", ")}` : "No library dependency"}</small>
-              </div>
-              <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} />
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
+              <strong>{library.title}</strong>
+            </div>
+            <div class="library-labels">
+              <span class:list={["theme-badge", theme.tone]}>{theme.label}</span>
+              <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} variant="strong" />
+            </div>
+            <div class="library-description">
+              <span>{library.summary}</span>
+              <small>{library.dependencies.length ? `Depends on ${library.dependencies.join(", ")}` : "No library dependency"}</small>
+            </div>
+            <div class="library-download">
+              <span>{library.singleFileDownload ? library.singleFileDownload.split("/").pop() : "In repository"}</span>
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </div>
+          </a>
+        );
+      })}
+    </div>
   </section>
 </BaseLayout>
 
@@ -152,7 +125,7 @@ const remainingLibraries = libraries.filter((library) => !groupedSlugs.has(libra
   }
 
   .library-hero-copy h1 {
-    margin: 0;
+    margin: 0.35rem 0 0;
     max-width: 15ch;
     font-size: clamp(3rem, 6vw, 5.8rem);
     line-height: 0.98;
@@ -194,99 +167,205 @@ const remainingLibraries = libraries.filter((library) => !groupedSlugs.has(libra
     line-height: 1.45;
   }
 
-  .library-groups {
+  .dependency-overview {
     display: grid;
     gap: 1rem;
     margin-top: 1.5rem;
-  }
-
-  .library-group {
     padding: 1rem;
   }
 
-  .group-heading {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    align-items: start;
-    margin-bottom: 1rem;
+  .overview-heading {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.45fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: end;
   }
 
-  .group-heading h2 {
+  .overview-heading h2 {
     margin: 0.35rem 0 0;
-    max-width: 58rem;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+  }
+
+  .overview-heading p {
+    margin: 0;
     color: var(--muted-strong);
-    font-size: clamp(1.25rem, 2vw, 1.7rem);
-    line-height: 1.35;
-    font-weight: 650;
+    line-height: 1.65;
   }
 
-  .group-heading > span {
-    flex: 0 0 auto;
-    color: var(--muted);
-    font-size: 0.86rem;
-    font-weight: 750;
-  }
-
-  .library-matrix {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.7rem;
-  }
-
-  .library-cell {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 0.8rem;
-    align-items: start;
-    padding: 0.9rem;
+  .dependency-map-frame {
+    overflow: auto;
+    max-width: 100%;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--surface-strong) 58%, transparent);
-    transition: background 160ms ease, border-color 160ms ease;
+    border-radius: 6px;
+    background: #fff;
   }
 
-  .library-cell:hover {
-    border-color: color-mix(in srgb, var(--accent-strong) 36%, var(--border));
-    background: color-mix(in srgb, var(--accent) 7%, var(--surface-strong));
+  .dependency-map-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 
-  .library-cell strong,
-  .library-cell p,
-  .library-cell small {
+  .catalog-section {
+    margin-top: 4rem;
+  }
+
+  .library-table {
+    overflow: hidden;
+  }
+
+  .library-table-head,
+  .library-row {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.85fr) minmax(190px, 0.75fr) minmax(260px, 1.65fr) minmax(145px, 0.65fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 0.95rem 1rem;
+  }
+
+  .library-table-head {
+    border-bottom: 1px solid var(--border);
+    color: var(--muted-strong);
+    font-size: 0.76rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  .library-row {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+    transition: background 160ms ease;
+  }
+
+  .library-row:last-child {
+    border-bottom: 0;
+  }
+
+  .library-row:hover {
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+  }
+
+  .library-name,
+  .library-labels,
+  .library-download {
+    display: flex;
+    align-items: center;
+  }
+
+  .library-name {
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .library-name strong {
+    font-size: 1.02rem;
+  }
+
+  .library-labels {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .theme-badge {
+    --theme-color: #0786a3;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.8rem;
+    padding: 0.28rem 0.58rem;
+    border: 1px solid color-mix(in srgb, var(--theme-color) 46%, var(--border));
+    border-radius: 6px;
+    color: color-mix(in srgb, var(--theme-color) 72%, var(--text));
+    background: color-mix(in srgb, var(--theme-color) 13%, var(--bg-card));
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  .theme-badge.runtime { --theme-color: #6e63e8; }
+  .theme-badge.io { --theme-color: #078d69; }
+  .theme-badge.web { --theme-color: #c96828; }
+  .theme-badge.data { --theme-color: #9b4fac; }
+  .theme-badge.foundation { --theme-color: #0786a3; }
+
+  .library-description {
+    min-width: 0;
+  }
+
+  .library-description span,
+  .library-description small {
     display: block;
   }
 
-  .library-cell p {
-    margin: 0.35rem 0;
+  .library-description span {
     color: var(--muted-strong);
     line-height: 1.5;
   }
 
-  .library-cell small {
+  .library-description small {
+    margin-top: 0.28rem;
     color: var(--muted);
     line-height: 1.4;
   }
 
-  @media (max-width: 950px) {
-    .library-landing,
-    .library-matrix {
-      grid-template-columns: 1fr;
+  .library-download {
+    justify-content: flex-end;
+    gap: 0.35rem;
+    min-width: 0;
+    color: var(--link);
+    font-size: 0.8rem;
+    font-weight: 750;
+  }
+
+  .library-download span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .library-download .material-symbols-outlined {
+    flex: 0 0 auto;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 1120px) {
+    .library-table-head {
+      display: none;
+    }
+
+    .library-row {
+      grid-template-columns: minmax(190px, 0.75fr) minmax(0, 1.25fr);
+      align-items: start;
+    }
+
+    .library-labels {
+      grid-column: 1;
+    }
+
+    .library-description {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+
+    .library-download {
+      grid-column: 2;
+      justify-content: flex-start;
     }
   }
 
-  @media (max-width: 640px) {
-    .library-cell {
-      grid-template-columns: auto minmax(0, 1fr);
+  @media (max-width: 760px) {
+    .library-landing,
+    .overview-heading,
+    .library-row {
+      grid-template-columns: 1fr;
     }
 
-    .library-cell .maturity-badge {
-      grid-column: 2;
-      justify-self: start;
+    .library-labels,
+    .library-description,
+    .library-download {
+      grid-column: 1;
+      grid-row: auto;
     }
 
-    .group-heading {
-      flex-direction: column;
+    .catalog-section {
+      margin-top: 3rem;
     }
   }
 </style>

@@ -2,11 +2,10 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import LibraryIcon from "../../components/LibraryIcon.astro";
 import MaturityBadge from "../../components/MaturityBadge.astro";
-import { getFeaturedLibraries, getHomeMetrics, getLibraries } from "../../lib/site-data";
+import { getFeaturedLibraries, getHomeMetrics } from "../../lib/site-data";
 import { withBase } from "../../lib/base";
 
 const metrics = getHomeMetrics();
-const libraries = getLibraries();
 const featuredLibraries = getFeaturedLibraries();
 
 const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to integrate", "✅ Bloat-free", "⛔️ No external dependencies", "⛔️ No hidden allocations", "⛔️ Not a framework"];
@@ -145,7 +144,7 @@ const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to i
       </div>
       <a class="button" href={withBase("/libraries/")}>
         <span class="material-symbols-outlined" aria-hidden="true">table_rows</span>
-        Full catalog
+        Library index
       </a>
     </div>
     <div class="featured-libraries">
@@ -162,35 +161,6 @@ const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to i
     </div>
   </section>
 
-  <section class="shell section">
-    <div class="section-heading">
-      <div class="eyebrow">Catalog</div>
-      <h2>Full list</h2>
-      <p>Use the catalog to pick the smallest useful building block for your project or Prompt Request.</p>
-    </div>
-    <div class="library-table panel">
-      <div class="library-table-head">
-        <div>Library</div>
-        <div>Status / Description</div>
-        <div>Download</div>
-      </div>
-      {libraries.map((library) => (
-        <a class="library-row" href={withBase(`/libraries/${library.slug}/`)}>
-          <div class="library-name">
-            <LibraryIcon slug={library.slug} size="sm" />
-            <strong>{library.title}</strong>
-          </div>
-          <div class="library-status">
-            <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} variant="strong" />
-            <span>{library.summary}</span>
-          </div>
-          <div class="library-download">
-            <span>{library.singleFileDownload ? library.singleFileDownload.split("/").pop() : "In repo"}</span>
-          </div>
-        </a>
-      ))}
-    </div>
-  </section>
 </BaseLayout>
 
 <style>
@@ -562,74 +532,6 @@ const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to i
     line-height: 1.55;
   }
 
-  .library-table {
-    overflow: hidden;
-  }
-
-  .library-table-head,
-  .library-row {
-    display: grid;
-    grid-template-columns: minmax(220px, 1.1fr) minmax(0, 2.4fr) minmax(170px, 0.9fr);
-    gap: 1rem;
-    align-items: center;
-    padding: 0.95rem 1rem;
-  }
-
-  .library-table-head {
-    border-bottom: 1px solid var(--border);
-    color: var(--muted-strong);
-    text-transform: uppercase;
-    letter-spacing: 0;
-    font-size: 0.76rem;
-    font-weight: 850;
-  }
-
-  .library-row {
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-    transition: background 160ms ease;
-  }
-
-  .library-row:last-child {
-    border-bottom: 0;
-  }
-
-  .library-row:hover {
-    background: color-mix(in srgb, var(--accent) 7%, transparent);
-  }
-
-  .library-name {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .library-name strong {
-    font-size: 1.02rem;
-  }
-
-  .library-status {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .library-status span {
-    color: var(--muted);
-    line-height: 1.55;
-  }
-
-  .library-download {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .library-download span {
-    color: var(--link);
-    font-size: 0.84rem;
-    font-weight: 750;
-  }
-
   @media (max-width: 1100px) {
     .agent-hero {
       min-height: auto;
@@ -695,22 +597,5 @@ const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to i
       grid-template-columns: 1fr;
     }
 
-    .library-table-head {
-      display: none;
-    }
-
-    .library-row {
-      grid-template-columns: 1fr;
-      align-items: start;
-    }
-
-    .library-status {
-      flex-direction: column;
-      align-items: start;
-    }
-
-    .library-download {
-      justify-content: start;
-    }
   }
 </style>
