@@ -98,8 +98,8 @@ const orderedLibraries = [...libraries].sort((left, right) => {
               <strong>{library.title}</strong>
             </div>
             <div class="library-labels">
-              <span class:list={["theme-badge", theme.tone]}>{theme.label}</span>
               <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} variant="strong" />
+              <span class:list={["theme-badge", theme.tone]}>{theme.label}</span>
             </div>
             <div class="library-description">
               <span>{library.summary}</span>
@@ -263,6 +263,11 @@ const orderedLibraries = [...libraries].sort((left, right) => {
   .library-labels {
     flex-wrap: wrap;
     gap: 0.45rem;
+  }
+
+  .library-labels :global(.maturity-badge) {
+    width: 6.4rem;
+    justify-content: center;
   }
 
   .theme-badge {

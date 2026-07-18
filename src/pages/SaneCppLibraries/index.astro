@@ -136,16 +136,12 @@ const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to i
   </section>
 
   <section class="shell section library-map-section">
-    <div class="section-heading heading-with-link">
+    <div class="section-heading">
       <div>
         <div class="eyebrow">Libraries</div>
         <h2>Not a framework</h2>
         <p>The project is not a framework. The libraries try to stay as independent as possible, even at the cost of some internal duplication, while still working smoothly together. You can use one or two of them without pulling in the whole codebase.</p>
       </div>
-      <a class="button" href={withBase("/libraries/")}>
-        <span class="material-symbols-outlined" aria-hidden="true">table_rows</span>
-        Library index
-      </a>
     </div>
     <div class="featured-libraries">
       {featuredLibraries.map((library) => (
@@ -158,6 +154,12 @@ const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to i
           <MaturityBadge label={library.maturityLabel} tone={library.maturityTone} />
         </a>
       ))}
+    </div>
+    <div class="library-list-action">
+      <a class="button" href={withBase("/libraries/")}>
+        Explore the full library list
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+      </a>
     </div>
   </section>
 
@@ -467,6 +469,12 @@ const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to i
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.8rem;
+  }
+
+  .library-list-action {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
   }
 
   .dependency-map-section {
