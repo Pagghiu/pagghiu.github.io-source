@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import GuideFlow from "../../../components/GuideFlow.astro";
+import InstallTabs from "../../../components/InstallTabs.astro";
 import { getCoverageSummary, getGuides, renderGuideMarkdown } from "../../../lib/site-data";
 import { withBase } from "../../../lib/base";
 import { decodeHTML } from "entities";
@@ -25,6 +26,7 @@ html = html.replace(/<h([1-3])>([\s\S]*?)<\/h\1>/g, (_match, levelText, contents
 
 const isPlatforms = guide.slug === "platforms";
 const isTests = guide.slug === "tests";
+const isBuildingUser = guide.slug === "building-user";
 const coverageSummary = isTests ? getCoverageSummary() : null;
 const guideFlows = {
   build: "build",
@@ -46,6 +48,14 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
   </section>
   <section class="shell page-grid">
     <div class="guide-primary">
+      {isBuildingUser && (
+        <section class="integration-chooser panel">
+          <div class="eyebrow">Integration size</div>
+          <h2>Start as small as the program needs</h2>
+          <p>Each option uses the same APIs. Only the way the library code enters your build changes.</p>
+          <InstallTabs />
+        </section>
+      )}
       {guideFlow && <GuideFlow variant={guideFlow} />}
       {isPlatforms ? (
         <article class="platform-guide">
@@ -71,6 +81,34 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
         </article>
       ) : (
         <article class="panel prose article" set:html={html} />
+      )}
+
+      {isBuildingUser && (
+        <section id="native-hot-reload" class="hot-reload-showcase panel">
+          <div class="hot-reload-copy">
+            <div class="eyebrow">A deliberately extreme example</div>
+            <h2>Native hot reload on an iPad</h2>
+            <p>
+              This recording shows a Sane C++ host reloading native plugin code on a jailbroken iPad. It is a hacky
+              target, but a useful demonstration of the boundary between a stable host, exported library symbols, and
+              replaceable custom code.
+            </p>
+            <div class="hot-reload-links">
+              <a href={withBase("/libraries/plugin/")}>Read about Plugin</a>
+              <a href="https://x.com/pagghiu_/status/1809297305662550254">Development notes</a>
+              <a href="https://x.com/pagghiu_/status/1808987625769840652">Earlier experiment</a>
+            </div>
+          </div>
+          <video
+            controls
+            playsinline
+            preload="none"
+            poster="/images/examples/plugin-hot-reload.jpg"
+            aria-label="Sane C++ plugin hot reload running on a jailbroken iPad"
+          >
+            <source src="https://github.com/Pagghiu/SaneCppLibraries/assets/5406873/5c7d4036-6e0c-4262-ad57-9ef84c214717" type="video/mp4" />
+          </video>
+        </section>
       )}
 
       {isTests && (
@@ -144,6 +182,55 @@ const tocBaseLevel = tocItems.length > 0 ? Math.min(...tocItems.map((item) => it
     max-width: 100%;
     padding: 1.5rem;
     overflow: hidden;
+  }
+
+  .integration-chooser {
+    padding: 1.25rem;
+  }
+
+  .integration-chooser h2,
+  .hot-reload-showcase h2 {
+    margin: 0.35rem 0 0;
+    font-size: clamp(1.55rem, 2.8vw, 2.3rem);
+  }
+
+  .integration-chooser > p,
+  .hot-reload-copy > p {
+    margin: 0.75rem 0 0;
+    color: var(--muted-strong);
+    line-height: 1.65;
+  }
+
+  .integration-chooser > p {
+    max-width: 54ch;
+  }
+
+  .hot-reload-showcase {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+
+  .hot-reload-showcase video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: #070b13;
+    object-fit: contain;
+  }
+
+  .hot-reload-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1rem;
+    margin-top: 1rem;
+  }
+
+  .hot-reload-links a {
+    color: var(--link);
+    font-weight: 750;
   }
 
   .article :global(h1),

@@ -2,32 +2,32 @@
 const tabs = [
   {
     id: "single-file",
-    label: "Small: single file",
-    copy: "Start with the simplest model: one generated header for one library.",
-    code: `#include "SaneCppFoundation.h"
-#define SANE_CPP_IMPLEMENTATION
-#include "SaneCppFoundation.h"`
+    label: "Small",
+    copy: "Download one released standalone header when your program needs a single library.",
+    code: `#include "SaneCppFoundation.h"`
   },
   {
     id: "repo-checkout",
-    label: "Medium: unity build",
-    copy: "Clone the repo, add SC.cpp to your build, and include the libraries you need.",
-    code: `git clone https://github.com/Pagghiu/SaneCppLibraries.git
-# add SC.cpp to your build
-# include Libraries/Foundation/*.h`
+    label: "Medium",
+    copy: "Add the unity build when several libraries need to work together.",
+    code: `Sources/
+├── SC.cpp
+└── YourApplication.cpp
+
+Include path: SaneCppLibraries/Includes`
   },
   {
     id: "build-integration",
-    label: "Big: SC::Build",
-    copy: "Use SC::Build when you want the full project workflow: examples, tests, native builds, cross targets, and package-managed toolchains.",
-    code: `./SC.sh build configure
-./SC.sh build compile SCTest
-./SC.sh build run SCExample`
+    label: "Big",
+    copy: "Compile selected library sources separately when your build needs finer-grained targets and incremental work.",
+    code: `Includes/                 # public API
+Libraries/Foundation/    # selected sources
+Libraries/Strings/       # selected sources`
   }
 ];
 ---
 
-<div class="install-tabs" role="tablist" aria-label="Adoption modes">
+<div class="install-tabs" role="tablist" aria-label="Integration sizes">
   {tabs.map((tab, index) => (
     <button
       class={`install-tab ${index === 0 ? "active" : ""}`}

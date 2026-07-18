@@ -1,23 +1,15 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import InstallTabs from "../../components/InstallTabs.astro";
 import LibraryIcon from "../../components/LibraryIcon.astro";
 import MaturityBadge from "../../components/MaturityBadge.astro";
-import { getFeaturedLibraries, getHomeMetrics, getLibraries, getSkills } from "../../lib/site-data";
+import { getFeaturedLibraries, getHomeMetrics, getLibraries } from "../../lib/site-data";
 import { withBase } from "../../lib/base";
 
 const metrics = getHomeMetrics();
 const libraries = getLibraries();
 const featuredLibraries = getFeaturedLibraries();
-const [skill] = getSkills();
-const heroLibraries = libraries.map((library) => ({ slug: library.slug, title: library.title }));
 
 const constraints = ["✅ Agent-ready", "✅ Fast compile times", "✅ Easy to integrate", "✅ Bloat-free", "⛔️ No external dependencies", "⛔️ No hidden allocations", "⛔️ Not a framework"];
-const agentBrief = `Title: HttpClient: Add a request timeout option
-Objective: fail requests that take too long
-Context: fit the existing streaming-first design
-Constraints: no hidden allocations, preserve platform backends
-Validation: run the focused HttpClient tests in Debug`;
 ---
 
 <BaseLayout
@@ -111,32 +103,37 @@ Validation: run the focused HttpClient tests in Debug`;
     </div>
   </section>
 
-  <section class="shell section workbench-section">
-    <div class="agent-brief panel">
-      <div class="section-heading compact">
-        <div class="eyebrow">Contributions</div>
-        <h2>PR means Prompt Request</h2>
-        <p>
-          The maintainer should be able to recreate or adapt the work from a clean checkout. The prompt is evaluated as
-          durable context, not as a demand for byte-identical code.
-        </p>
+  <section class="shell section example-showcase panel">
+    <div class="example-showcase-copy">
+      <div class="eyebrow">Built with Sane C++</div>
+      <h2>One executable, no external dependencies</h2>
+      <p>
+        AsyncWebServer serves files, accepts streamed uploads, upgrades WebSocket connections, and keeps a shared canvas
+        in sync. The executable is built from the Sane C++ unity source, <code>SC.cpp</code>, plus the application's own
+        code. There is no external runtime or framework hidden behind the example.
+      </p>
+      <div class="example-facts" aria-label="AsyncWebServer structure">
+        <span><code>SC.cpp</code></span>
+        <span>Custom application code</span>
+        <span>One native executable</span>
       </div>
-      <pre><code>{agentBrief}</code></pre>
-      {skill && (
-        <a class="text-link" href={withBase("/skills/")}>
-          Open the repository skill
+      <div class="example-actions">
+        <a class="button" href={withBase("/guides/examples/")}>Watch more examples</a>
+        <a class="text-link" href="https://github.com/Pagghiu/SaneCppLibraries/tree/main/Examples/AsyncWebServer">
+          Browse the source
           <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
         </a>
-      )}
-    </div>
-
-    <aside class="adoption-panel panel">
-      <div class="section-heading compact">
-        <div class="eyebrow">Investment level</div>
-        <h2>Small, medium or big</h2>
       </div>
-      <InstallTabs />
-    </aside>
+    </div>
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster="/images/examples/async-web-server.jpg"
+      aria-label="AsyncWebServer example demonstration"
+    >
+      <source src="https://github.com/user-attachments/assets/d6ad7ecf-8c98-430d-84e0-93ebbfb05dc1" type="video/mp4" />
+    </video>
   </section>
 
   <section class="shell section library-map-section">
@@ -424,30 +421,60 @@ Validation: run the focused HttpClient tests in Debug`;
     line-height: 1.65;
   }
 
-  .workbench-section {
+  .example-showcase {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.82fr);
-    gap: 1rem;
-  }
-
-  .agent-brief,
-  .adoption-panel {
-    min-width: 0;
+    grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr);
+    gap: 1.5rem;
+    align-items: center;
     padding: 1.25rem;
   }
 
-  .compact {
-    margin-bottom: 1rem;
+  .example-showcase-copy h2 {
+    margin: 0.4rem 0 0;
+    font-size: clamp(1.8rem, 3.3vw, 3rem);
+    line-height: 1.08;
   }
 
-  .compact h2 {
-    font-size: clamp(1.6rem, 2.6vw, 2.35rem);
+  .example-showcase-copy > p {
+    margin: 1rem 0 0;
+    color: var(--muted-strong);
+    line-height: 1.7;
   }
 
-  .agent-brief pre {
-    margin: 1rem 0;
-    font-size: 0.93rem;
-    line-height: 1.65;
+  .example-facts,
+  .example-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+  }
+
+  .example-facts {
+    margin-top: 1.2rem;
+  }
+
+  .example-facts span {
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted-strong);
+    background: var(--surface-soft);
+    font-size: 0.84rem;
+    font-weight: 750;
+  }
+
+  .example-actions {
+    margin-top: 1.25rem;
+  }
+
+  .example-showcase video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: #070b13;
+    object-fit: contain;
   }
 
   .text-link {
@@ -609,7 +636,7 @@ Validation: run the focused HttpClient tests in Debug`;
     }
 
     .hero-grid,
-    .workbench-section,
+    .example-showcase,
     .model-grid,
     .featured-libraries {
       grid-template-columns: 1fr;

@@ -303,13 +303,31 @@ function parsePelicanArticle(source: string) {
 }
 
 function parseMaturity(raw: string) {
-  const trimmed = raw.trim();
-  const label = trimmed.replace(/^[🟥🟨🟩🟦]\s*/u, "").trim();
-  if (trimmed.startsWith("🟥")) return { label, tone: "draft" as const };
-  if (trimmed.startsWith("🟨")) return { label, tone: "mvp" as const };
-  if (trimmed.startsWith("🟩")) return { label, tone: "usable" as const };
-  if (trimmed.startsWith("🟦")) return { label, tone: "complete" as const };
-  return { label, tone: "unknown" as const };
+  const normalized = raw
+    .replace(/[🟥🟨🟩🟦]/gu, "")
+    .replace(/[*_`]/g, "")
+    .trim();
+
+  if (/^draft\b/i.test(normalized) || raw.includes("🟥")) return { label: "Draft", tone: "draft" as const };
+  if (/^mvp\b/i.test(normalized) || raw.includes("🟨")) return { label: "MVP", tone: "mvp" as const };
+  if (/^usable\b/i.test(normalized) || raw.includes("🟩")) return { label: "Usable", tone: "usable" as const };
+  if (/^complete\b/i.test(normalized) || raw.includes("🟦")) return { label: "Complete", tone: "complete" as const };
+  return { label: "Not specified", tone: "unknown" as const };
+}
+
+function readReadmeMaturity() {
+  const readmePath = path.join(repoRoot, "README.md");
+  if (!fs.existsSync(readmePath)) return new Map<string, string>();
+
+  const result = new Map<string, string>();
+  const readme = fs.readFileSync(readmePath, "utf8");
+  const rows = readme.matchAll(
+    /\[[^\]]+\]\([^\n)]*\/(library_[a-z0-9_]+)\.html\)[^\n]*?\|\s*([🟥🟨🟩🟦])/giu
+  );
+  for (const match of rows) {
+    result.set(match[1], match[2]);
+  }
+  return result;
 }
 
 export function getGuides(): Guide[] {
@@ -358,16 +376,19 @@ export function getGuides(): Guide[] {
 }
 
 export function getLibraries(): Library[] {
+  const readmeMaturity = readReadmeMaturity();
   return readFiles(librariesDir).map((file) => {
     const raw = fs.readFileSync(file, "utf8");
     const header = extractPageHeader(raw);
     const slug = normalizeSlug(header.pageId || path.basename(file, ".md"));
-    const maturityMatch = raw.match(/# Status[\s\S]*?\n([^\n]+)/m);
+    const statusSection = raw.match(/^# Status\s*$([\s\S]*?)(?=^#\s|(?![\s\S]))/m)?.[1] ?? "";
+    const statusLine = statusSection.split("\n").map((line) => line.trim()).find(Boolean) ?? "";
     const downloadMatch = raw.match(/\[SaneCpp[^\]]+\]\((https:\/\/github\.com\/[^\)]+)\)/);
     const dependencyGraphMatch = raw.match(/!\[Dependency Graph\]\(([^)]+)\)/);
     const dependencyLine = raw.match(/- Dependencies:\s+(.+)$/m)?.[1] ?? "";
     const dependencies = [...dependencyLine.matchAll(/\[([^\]]+)\]\(@ref [^)]+\)/g)].map((match) => match[1]);
-    const maturity = parseMaturity(maturityMatch?.[1] ?? "Unknown");
+    const maturitySource = statusLine || readmeMaturity.get(header.pageId) || "";
+    const maturity = parseMaturity(maturitySource);
     return {
       slug,
       title: header.title || path.basename(file, ".md"),
@@ -375,7 +396,7 @@ export function getLibraries(): Library[] {
       pageId: header.pageId,
       oldPath: `${header.pageId}.html`,
       sourcePath: file,
-      maturity: (maturityMatch?.[1] ?? "Unknown").trim(),
+      maturity: maturitySource,
       dependencyGraph: dependencyGraphMatch?.[1] ?? null,
       singleFileDownload: downloadMatch?.[1] ?? null,
       dependencies,
