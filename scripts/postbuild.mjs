@@ -51,6 +51,15 @@ if (fs.existsSync(doxygenDir)) {
   );
 }
 
+const renamedAsyncFibersReference = path.join(referenceDir, "library_async_fibers.html");
+const legacyAsyncFibersReference = path.join(referenceDir, "library_fibers_async.html");
+if (fs.existsSync(renamedAsyncFibersReference) && !fs.existsSync(legacyAsyncFibersReference)) {
+  writeRedirect(
+    path.join("SaneCppLibraries", "reference", "doxygen", "library_fibers_async.html"),
+    "library_async_fibers.html"
+  );
+}
+
 for (const [file, target] of Object.entries(legacyRedirects)) {
   writeRedirect(path.join("SaneCppLibraries", file), target);
 }

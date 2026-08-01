@@ -11,7 +11,7 @@ const themes = [
   {
     label: "Runtime",
     tone: "runtime",
-    slugs: ["async", "async-streams", "await", "fibers", "fibers-async", "plugin", "process", "threading"]
+    slugs: ["async", "async-streams", "await", "fibers", "async-fibers", "plugin", "process", "threading"]
   },
   {
     label: "I/O",
@@ -66,7 +66,7 @@ const orderedLibraries = [...libraries].sort((left, right) => {
         <h2>Library map</h2>
       </div>
       <p>
-        Most libraries are independent. Higher-level libraries such as Async, Await, FibersAsync, Http, and Plugin
+        Most libraries are independent. Higher-level libraries such as Async, Await, AsyncFibers, Http, and Plugin
         combine smaller platform abstractions.
       </p>
     </div>
