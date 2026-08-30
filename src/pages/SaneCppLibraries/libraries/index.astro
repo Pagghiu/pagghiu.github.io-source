@@ -27,6 +27,11 @@ const themes = [
     label: "Data",
     tone: "data",
     slugs: ["containers", "containers-reflection", "reflection", "serialization-binary", "serialization-text"]
+  },
+  {
+    label: "Security",
+    tone: "security",
+    slugs: ["cryptography"]
   }
 ];
 
@@ -78,7 +83,7 @@ const orderedLibraries = [...libraries].sort((left, right) => {
   <section class="shell catalog-section">
     <div class="section-heading">
       <div class="eyebrow">All libraries</div>
-      <h2>One index, five themes</h2>
+      <h2>One index, six themes</h2>
       <p>Theme labels make related areas easier to scan without separating the catalog into different lists.</p>
     </div>
 
@@ -288,6 +293,7 @@ const orderedLibraries = [...libraries].sort((left, right) => {
   .theme-badge.io { --theme-color: #078d69; }
   .theme-badge.web { --theme-color: #c96828; }
   .theme-badge.data { --theme-color: #9b4fac; }
+  .theme-badge.security { --theme-color: #c75b61; }
   .theme-badge.foundation { --theme-color: #0786a3; }
 
   .library-description {
