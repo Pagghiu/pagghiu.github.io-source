@@ -5,6 +5,7 @@ export const legacyRedirects = {
   "library_await.html": "/SaneCppLibraries/libraries/await/",
   "library_containers.html": "/SaneCppLibraries/libraries/containers/",
   "library_containers_reflection.html": "/SaneCppLibraries/libraries/containers-reflection/",
+  "library_cryptography.html": "/SaneCppLibraries/libraries/cryptography/",
   "library_file.html": "/SaneCppLibraries/libraries/file/",
   "library_file_system.html": "/SaneCppLibraries/libraries/file-system/",
   "library_file_system_iterator.html": "/SaneCppLibraries/libraries/file-system-iterator/",
